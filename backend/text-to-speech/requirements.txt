@@ -4,3 +4,5 @@ pydantic
 fastapi
 requests
 chatterbox-tts
+twilio>=8.0.0
+boto3>=1.34.0
