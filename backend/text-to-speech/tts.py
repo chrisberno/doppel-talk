@@ -11,7 +11,9 @@ from pydantic import BaseModel
 import torch
 import torchaudio
 
-app = modal.App("ai-voice-studio-sahand")
+# Get Modal app name from environment, with fallback
+MODAL_APP_NAME = os.environ.get("MODAL_APP_NAME", "doppel-center")
+app = modal.App(MODAL_APP_NAME)
 
 image = (
     modal.Image.debian_slim(python_version="3.11")
@@ -20,9 +22,13 @@ image = (
     .apt_install("ffmpeg")
 )
 
-volume = modal.Volume.from_name("hf-cache-ai-voice-studio", create_if_missing=True)
+# Get volume and secret names from environment, with fallbacks
+HF_CACHE_VOLUME_NAME = os.environ.get("MODAL_HF_CACHE_VOLUME", f"hf-cache-{MODAL_APP_NAME}")
+AWS_SECRET_NAME = os.environ.get("MODAL_AWS_SECRET_NAME", f"{MODAL_APP_NAME}-aws-secret")
 
-s3_secret = modal.Secret.from_name("ai-voice-studio-aws-secret")
+volume = modal.Volume.from_name(HF_CACHE_VOLUME_NAME, create_if_missing=True)
+
+s3_secret = modal.Secret.from_name(AWS_SECRET_NAME)
 
 class TextToSpeechRequest(BaseModel):
     text: str
@@ -35,12 +41,15 @@ class TextToSpeechRequest(BaseModel):
 class TextToSpeechResponse(BaseModel):
     s3_Key: str
 
+# Get S3 bucket name from environment, with fallback
+AWS_S3_BUCKET_NAME = os.environ.get("AWS_S3_BUCKET_NAME", MODAL_APP_NAME)
+
 @app.cls(
     image=image,
     gpu="L40S",
     volumes={
         "/root/.cache/huppingface": volume,
-        "/s3-mount": modal.CloudBucketMount("ai-voice-studio-sahand", secret=s3_secret)
+        "/s3-mount": modal.CloudBucketMount(AWS_S3_BUCKET_NAME, secret=s3_secret)
     },
     scaledown_window=120,
     secrets=[s3_secret]

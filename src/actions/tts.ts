@@ -22,8 +22,18 @@ interface GenerateSpeechResult {
   error?: string;
 }
 
-const S3_BUCKET_URL =
-  "https://ai-voice-studio-sahand.s3.ap-southeast-2.amazonaws.com";
+// Get S3 bucket URL from environment, with fallback for development
+function getS3BucketUrl(): string {
+  const bucketUrl = env.AWS_S3_BUCKET_URL;
+  if (!bucketUrl) {
+    console.warn(
+      "AWS_S3_BUCKET_URL not set. Using fallback URL. Set AWS_S3_BUCKET_URL in your .env file.",
+    );
+    // Fallback for development - should be set in production
+    return "https://doppel-center.s3.us-east-1.amazonaws.com";
+  }
+  return bucketUrl;
+}
 
 export async function generateSpeech(
   data: GenerateSpeechData,
@@ -80,7 +90,8 @@ export async function generateSpeech(
 
     const result = (await response.json()) as { s3_Key: string };
 
-    const audioUrl = `${S3_BUCKET_URL}/${result.s3_Key}`;
+    const s3BucketUrl = getS3BucketUrl();
+    const audioUrl = `${s3BucketUrl}/${result.s3_Key}`;
 
     await db.user.update({
       where: { id: session.user.id },
