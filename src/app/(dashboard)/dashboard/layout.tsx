@@ -17,8 +17,8 @@ import BreadcrumbPageClient from '~/components/sidebar/breadcrumb-page-client';
 import AppSidebar from '~/components/sidebar/app-sidebar';
 
 export const metadata: Metadata = {
-  title: "Doppel Center",
-  description: "Doppel Center Enterprise - Transform text into natural speech",
+  title: "Doppel Talk",
+  description: "Doppel Talk Enterprise - Transform text into natural speech",
   icons: [{ rel: "icon", url: "/favicon.ico" }],
 };
 

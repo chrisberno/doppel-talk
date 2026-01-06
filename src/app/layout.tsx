@@ -5,8 +5,8 @@ import { Geist } from "next/font/google";
 import { Toaster } from '~/components/ui/sonner';
 
 export const metadata: Metadata = {
-  title: "Doppel Center",
-  description: "Enterprise voice tech application with AI TTS, Twilio integration, and IVR exports",
+  title: "Doppel Talk",
+  description: "Enterprise A.I. Voice Solutions",
   icons: [{ rel: "icon", url: "/favicon.ico" }],
 };
 

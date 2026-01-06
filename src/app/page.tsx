@@ -91,7 +91,7 @@ export default function HomePage() {
                 <Sparkles className="h-5 w-5 text-white" />
               </div>
               <span className="bg-gradient-to-r from-indigo-600 to-cyan-600 bg-clip-text text-xl font-bold text-transparent">
-                Doppel Center
+                Doppel Talk
               </span>
             </div>
             <div className="hidden items-center space-x-8 md:flex">
@@ -300,7 +300,7 @@ export default function HomePage() {
               </span>
             </h2>
             <p className="mt-4 text-lg text-slate-600">
-              See what our users are saying about Doppel Center
+              See what our users are saying about Doppel Talk
             </p>
           </div>
           <div className="grid gap-6 md:grid-cols-3">
@@ -443,7 +443,7 @@ export default function HomePage() {
                     <Sparkles className="h-5 w-5 text-white" />
                   </div>
                   <span className="bg-gradient-to-r from-indigo-600 to-cyan-600 bg-clip-text text-xl font-bold text-transparent">
-                    Doppel Center
+                    Doppel Talk
                   </span>
                 </div>
                 <p className="max-w-md text-slate-600">
@@ -504,7 +504,7 @@ export default function HomePage() {
               </div>
             </div>
             <div className="mt-16 border-t border-slate-200 pt-8 text-center text-sm text-slate-500">
-              <p>&copy; 2025 Doppel Center. All rights reserved.</p>
+              <p>&copy; 2025 Doppel Talk. All rights reserved.</p>
             </div>
           </div>
         </div>

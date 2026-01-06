@@ -1,7 +1,7 @@
 {
-  "name": "doppel-center-enterprise",
+  "name": "doppel-talk-enterprise",
   "version": "2.0.0",
-  "description": "Enterprise voice tech application with AI TTS, Twilio integration, and IVR exports",
+  "description": "Enterprise A.I. Voice Solutions",
   "private": true,
   "type": "module",
   "scripts": {

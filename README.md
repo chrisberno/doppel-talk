@@ -1,10 +1,10 @@
-# Doppel Center Enterprise Voice Tech Application v2.0
+# Doppel Talk Enterprise A.I. Voice Solutions
 
-Enterprise voice technology platform combining AI-powered text-to-speech with Twilio integration and IVR export capabilities.
+Enterprise A.I. voice technology platform combining AI-powered text-to-speech with Twilio integration and IVR export capabilities.
 
 ## Overview
 
-Doppel Center is a production-ready platform that combines:
+Doppel Talk is a production-ready platform that combines:
 - **AI TTS Generation**: Multiple providers (Chatterbox AI, Twilio, Amazon Polly)
 - **Enterprise IVR Tools**: TwiML, Studio JSON, and code snippet exports
 - **Voice Library**: 16+ curated voices across multiple languages
@@ -16,7 +16,7 @@ Doppel Center is a production-ready platform that combines:
 
 | Layer | Technology |
 |-------|------------|
-| **Frontend** | Next.js 16, TypeScript, Tailwind CSS, Twilio Paste |
+| **Frontend** | Next.js 16, TypeScript, Tailwind CSS |
 | **Backend** | Python 3.11 on Modal (serverless) |
 | **Database** | Neon (PostgreSQL) + Prisma ORM |
 | **Auth** | Better Auth |

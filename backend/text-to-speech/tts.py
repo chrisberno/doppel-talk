@@ -15,7 +15,7 @@ from twilio.rest import Client as TwilioClient
 from twilio.base.exceptions import TwilioRestException
 
 # Get Modal app name from environment, with fallback
-MODAL_APP_NAME = os.environ.get("MODAL_APP_NAME", "doppel-center")
+MODAL_APP_NAME = os.environ.get("MODAL_APP_NAME", "doppel-talk")
 app = modal.App(MODAL_APP_NAME)
 
 image = (

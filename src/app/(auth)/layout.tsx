@@ -20,7 +20,7 @@ export default function AuthLayout({ children }: { children: ReactNode }) {
                 <Sparkles className="h-7 w-7 text-violet-300" />
               </div>
               <span className="text-2xl font-bold text-violet-50">
-                Doppel Center
+                Doppel Talk
               </span>
             </Link>
 
@@ -107,7 +107,7 @@ export default function AuthLayout({ children }: { children: ReactNode }) {
                   <Sparkles className="h-6 w-6 text-white" />
                 </div>
                 <span className="bg-gradient-to-r from-violet-600 to-purple-600 bg-clip-text text-xl font-bold text-transparent">
-                  Doppel Center
+                  Doppel Talk
                 </span>
               </Link>
             </div>

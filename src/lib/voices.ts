@@ -1,7 +1,7 @@
 /**
  * Voice Library
  * 
- * Curated voices from doppel-center v1, ported to TypeScript.
+ * Curated voices from doppel-talk v1, ported to TypeScript.
  * Supports multiple providers: chatterbox, twilio, polly
  */
 

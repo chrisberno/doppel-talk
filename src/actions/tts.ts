@@ -39,7 +39,7 @@ function getS3BucketUrl(): string {
       "AWS_S3_BUCKET_URL not set. Using fallback URL. Set AWS_S3_BUCKET_URL in your .env file.",
     );
     // Fallback for development - should be set in production
-    return "https://doppel-center.s3.us-east-1.amazonaws.com";
+    return "https://doppel-talk.s3.us-east-1.amazonaws.com";
   }
   return bucketUrl;
 }
