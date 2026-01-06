@@ -3,7 +3,6 @@ import "~/styles/globals.css";
 import { type Metadata } from "next";
 import { Geist } from "next/font/google";
 import { Toaster } from '~/components/ui/sonner';
-import { PasteThemeProvider } from '~/components/paste-theme-provider';
 
 export const metadata: Metadata = {
   title: "Doppel Center",
@@ -21,11 +20,9 @@ export default function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en" className={`${geist.variable}`}>
-      <body>
-        <PasteThemeProvider>
-          {children}
-          <Toaster />
-        </PasteThemeProvider>
+      <body>{children}
+
+        <Toaster />
       </body>
     </html>
   );

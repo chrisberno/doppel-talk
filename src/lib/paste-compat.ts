@@ -1,8 +1,12 @@
 /**
  * Twilio Paste + Tailwind CSS Compatibility Guide
  * 
- * This file documents the hybrid approach for using Twilio Paste components
- * alongside Tailwind CSS utilities.
+ * ⚠️ DEFERRED: Twilio Paste adoption is deferred until React 19 support is available.
+ * Currently using Tailwind CSS exclusively for all UI components.
+ * 
+ * This file documents the intended hybrid approach for future use when Paste supports React 19.
+ * 
+ * Original documentation for using Twilio Paste components alongside Tailwind CSS utilities:
  * 
  * ## Component Usage Strategy
  * 
