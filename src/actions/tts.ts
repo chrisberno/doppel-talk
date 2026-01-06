@@ -144,16 +144,31 @@ export async function generateSpeech(
       data: { credits: { decrement: creditsNeeded } },
     });
 
+    // Determine provider from request
+    const provider = (data.provider || "chatterbox").toLowerCase();
+    
+    // Store voice config as JSON if available
+    const voiceConfig = data.voice_id
+      ? {
+          voiceId: data.voice_id,
+          provider: provider,
+        }
+      : null;
+
     const audioProject = await db.audioProject.create({
       data: {
         text: data.text,
         audioUrl,
         s3Key: result.s3_Key,
         language: data.language,
-        voiceS3Key: data.voice_S3_key,
+        voiceS3Key: data.voice_S3_key || "",
         exaggeration: data.exaggeration,
         cfgWeight: data.cfg_weight,
         userId: session.user.id,
+        // New v2 fields
+        provider: provider,
+        voiceId: data.voice_id || null,
+        voiceConfig: voiceConfig,
       },
     });
 

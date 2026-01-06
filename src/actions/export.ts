@@ -4,6 +4,7 @@ import { headers } from "next/headers";
 import { auth } from "~/lib/auth";
 import { db } from "~/server/db";
 import { getVoiceById } from "~/lib/voices";
+import { escapeXml, escapeJavaScript, escapePython } from "~/lib/sanitize";
 
 export type ExportFormat = "twiml" | "studio-json" | "node-snippet" | "python-snippet";
 
@@ -13,24 +14,14 @@ interface ExportResult {
   error?: string;
 }
 
-/**
- * Escape XML special characters
- */
-function escapeXml(text: string): string {
-  return text
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&apos;");
-}
+// Using escapeXml from sanitize.ts
 
 /**
  * Generate TwiML XML for a project
  */
 function generateTwiML(text: string, voiceId?: string, language?: string): string {
-  const voiceAttr = voiceId ? ` voice="${voiceId}"` : "";
-  const langAttr = language ? ` language="${language}"` : "";
+  const voiceAttr = voiceId ? ` voice="${escapeXml(voiceId)}"` : "";
+  const langAttr = language ? ` language="${escapeXml(language)}"` : "";
   const escapedText = escapeXml(text);
 
   return `<?xml version="1.0" encoding="UTF-8"?>
@@ -104,9 +95,9 @@ function generateStudioJSON(text: string, voiceId?: string, language?: string): 
  * Generate Node.js code snippet
  */
 function generateNodeSnippet(text: string, voiceId?: string, language?: string): string {
-  const voiceConfig = voiceId ? `voice: "${voiceId}",` : "";
-  const langConfig = language ? `language: "${language}",` : "";
-  const escapedText = text.replace(/`/g, "\\`").replace(/\${/g, "\\${");
+  const voiceConfig = voiceId ? `voice: "${escapeJavaScript(voiceId)}",` : "";
+  const langConfig = language ? `language: "${escapeJavaScript(language)}",` : "";
+  const escapedText = escapeJavaScript(text);
 
   return `// Twilio Voice Configuration - Node.js
 // Install: npm install twilio
@@ -148,9 +139,9 @@ res.send(twiml);`;
  * Generate Python code snippet
  */
 function generatePythonSnippet(text: string, voiceId?: string, language?: string): string {
-  const voiceConfig = voiceId ? `voice="${voiceId}",` : "";
-  const langConfig = language ? `language="${language}",` : "";
-  const escapedText = text.replace(/"/g, '\\"').replace(/\n/g, "\\n");
+  const voiceConfig = voiceId ? `voice="${escapePython(voiceId)}",` : "";
+  const langConfig = language ? `language="${escapePython(language)}",` : "";
+  const escapedText = escapePython(text);
 
   const voiceAttr = voiceId ? ` voice="${voiceId}"` : "";
   const langAttr = language ? ` language="${language}"` : "";
@@ -218,11 +209,18 @@ export async function exportProject(
       return { success: false, error: "Unauthorized" };
     }
 
-    // Try to get voice information if we have a voice ID stored
-    // For now, we'll use the text and language from the project
-    // In a future update, we can store provider/voiceId in the AudioProject model
-    let voiceId: string | undefined;
-    let language: string | undefined = project.language;
+    // Get voice information from project (now stored in v2 schema)
+    const voiceId = project.voiceId || undefined;
+    const language = project.language;
+    
+    // Update export count and timestamp
+    await db.audioProject.update({
+      where: { id: projectId },
+      data: {
+        exportCount: { increment: 1 },
+        lastExportedAt: new Date(),
+      },
+    });
 
     // For projects created with Twilio/Polly, we'd need to store voiceId
     // For now, we'll generate exports without specific voice IDs for Chatterbox projects

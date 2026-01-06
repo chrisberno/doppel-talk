@@ -11,6 +11,10 @@ import {
   Music,
   Mic,
   Settings,
+  Code,
+  Database,
+  Key,
+  FileCode,
 } from "lucide-react";
 import { authClient } from "~/lib/auth-client";
 import { useEffect, useState } from "react";
@@ -18,6 +22,7 @@ import { getUserAudioProjects } from "~/actions/tts";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { Button } from "~/components/ui/button";
 import { useRouter } from "next/navigation";
+import { voices, getAllProviders } from "~/lib/voices";
 
 interface AudioProject {
   id: string;
@@ -230,6 +235,81 @@ export default function Dashboard() {
                     </div>
                   </div>
                 </Button>
+              </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Code className="text-primary h-5 w-5" />
+                Enterprise IVR Tools
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                <Button
+                  onClick={() => router.push("/dashboard/create")}
+                  variant="outline"
+                  className="group hover:bg-muted h-auto flex-col gap-2 p-4"
+                >
+                  <Database className="h-6 w-6 transition-transform group-hover:scale-110" />
+                  <div className="text-center">
+                    <div className="font-semibold text-sm">Voice Library</div>
+                    <div className="text-xs opacity-70">
+                      {voices.length}+ curated voices
+                    </div>
+                  </div>
+                </Button>
+                <Button
+                  onClick={() => router.push("/dashboard/projects")}
+                  variant="outline"
+                  className="group hover:bg-muted h-auto flex-col gap-2 p-4"
+                >
+                  <FileCode className="h-6 w-6 transition-transform group-hover:scale-110" />
+                  <div className="text-center">
+                    <div className="font-semibold text-sm">Export Templates</div>
+                    <div className="text-xs opacity-70">
+                      TwiML, Studio JSON, Code
+                    </div>
+                  </div>
+                </Button>
+                <Button
+                  variant="outline"
+                  className="group hover:bg-muted h-auto flex-col gap-2 p-4"
+                  disabled
+                  title="Credential Manager - Credentials are entered per-request and never stored"
+                >
+                  <Key className="h-6 w-6 transition-transform group-hover:scale-110 opacity-50" />
+                  <div className="text-center">
+                    <div className="font-semibold text-sm opacity-50">
+                      Credential Manager
+                    </div>
+                    <div className="text-xs opacity-50">
+                      Session-only (secure)
+                    </div>
+                  </div>
+                </Button>
+              </div>
+              <div className="mt-4 rounded-lg border bg-blue-50 p-3">
+                <div className="flex items-start gap-2">
+                  <div className="text-blue-600 text-sm font-semibold">
+                    Provider Support:
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {getAllProviders().map((provider) => (
+                      <span
+                        key={provider}
+                        className="rounded-full bg-blue-100 px-2 py-1 text-xs font-medium text-blue-700 capitalize"
+                      >
+                        {provider === "chatterbox" ? "AI" : provider}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+                <p className="mt-2 text-xs text-blue-700">
+                  Generate TTS with multiple providers. Credentials are passed
+                  through securely and never stored.
+                </p>
               </div>
             </CardContent>
           </Card>
