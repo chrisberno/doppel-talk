@@ -144,16 +144,13 @@ export async function generateSpeech(
       data: { credits: { decrement: creditsNeeded } },
     });
 
-    // Determine provider from request
-    const provider = (data.provider || "chatterbox").toLowerCase();
-    
     // Store voice config as JSON if available
     const voiceConfig = data.voice_id
       ? {
           voiceId: data.voice_id,
           provider: provider,
         }
-      : null;
+      : undefined;
 
     const audioProject = await db.audioProject.create({
       data: {
