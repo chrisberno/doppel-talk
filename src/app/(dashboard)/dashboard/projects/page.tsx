@@ -10,6 +10,7 @@ import {
   Trash2,
   Download,
   Plus,
+  Code,
 } from "lucide-react";
 
 import { authClient } from "~/lib/auth-client";
@@ -17,6 +18,7 @@ import { authClient } from "~/lib/auth-client";
 import { useEffect, useState } from "react";
 
 import { getUserAudioProjects, deleteAudioProject } from "~/actions/tts";
+import ExportModal from "~/components/export-modal";
 
 import { Card, CardContent } from "~/components/ui/card";
 
@@ -48,6 +50,8 @@ export default function Projects() {
   const [filteredProjects, setFilteredProjects] = useState<AudioProject[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState<SortBy>("newest");
+  const [exportModalOpen, setExportModalOpen] = useState(false);
+  const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
   const router = useRouter();
 
   useEffect(() => {
@@ -260,6 +264,19 @@ export default function Projects() {
                           variant="ghost"
                           size="sm"
                           className="h-8 w-8 p-0"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSelectedProjectId(project.id);
+                            setExportModalOpen(true);
+                          }}
+                          title="Export for Twilio"
+                        >
+                          <Code className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-8 w-8 p-0"
                           onClick={(e) =>
                             handleDownload(project.audioUrl, project.name, e)
                           }
@@ -283,6 +300,20 @@ export default function Projects() {
           )}
         </div>
       </SignedIn>
+      <ExportModal
+        isOpen={exportModalOpen}
+        onClose={() => {
+          setExportModalOpen(false);
+          setSelectedProjectId(null);
+        }}
+        projectId={selectedProjectId || undefined}
+        projectName={
+          selectedProjectId
+            ? filteredProjects.find((p) => p.id === selectedProjectId)?.name ||
+              filteredProjects.find((p) => p.id === selectedProjectId)?.text.substring(0, 30)
+            : undefined
+        }
+      />
     </>
   );
 }
