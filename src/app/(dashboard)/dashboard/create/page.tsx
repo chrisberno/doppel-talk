@@ -17,6 +17,7 @@ import type {
   Language,
   UploadedVoice,
 } from "~/types/tts";
+import { voices, type Voice, type VoiceProvider } from "~/lib/voices";
 import SpeechSettings from "~/components/create/speech-settings";
 import TextInput from "~/components/create/text-input";
 import AudioHistory from '~/components/create/audio-history';
@@ -61,6 +62,16 @@ export default function CreatePage() {
   const [selectedVoice, setSelectedVoice] = useState(
     VOICE_FILES[0]?.s3_key ?? "samples/voices/Michael.wav",
   );
+  
+  // Multi-provider support
+  const [provider, setProvider] = useState<VoiceProvider>("chatterbox");
+  const [selectedVoiceId, setSelectedVoiceId] = useState<string>("");
+  // Credentials (never stored, pass-through only)
+  const [twilioSid, setTwilioSid] = useState("");
+  const [twilioAuth, setTwilioAuth] = useState("");
+  const [awsAccessKey, setAwsAccessKey] = useState("");
+  const [awsSecretKey, setAwsSecretKey] = useState("");
+  const [awsRegion, setAwsRegion] = useState("us-east-1");
 
   const [exaggeration, setExaggeration] = useState(0.5);
   const [cfgWeight, setCfgWeight] = useState(0.5);
@@ -118,14 +129,36 @@ export default function CreatePage() {
       toast.error("Please enter some text!");
       return;
     }
+    
+    // Validate provider-specific requirements
+    if (provider === "twilio" && (!twilioSid || !twilioAuth)) {
+      toast.error("Twilio credentials required");
+      return;
+    }
+    if (provider === "polly" && (!awsAccessKey || !awsSecretKey)) {
+      toast.error("AWS credentials required for Polly");
+      return;
+    }
+    if ((provider === "twilio" || provider === "polly") && !selectedVoiceId) {
+      toast.error("Please select a voice");
+      return;
+    }
+    
     setIsGenerating(true);
     try {
       const result = await generateSpeechAction({
         text: text,
-        voice_S3_key: selectedVoice,
+        voice_S3_key: provider === "chatterbox" ? selectedVoice : undefined,
         language: selectedLanguage,
         exaggeration: exaggeration,
         cfg_weight: cfgWeight,
+        provider: provider,
+        voice_id: provider !== "chatterbox" ? selectedVoiceId : undefined,
+        twilio_sid: provider === "twilio" ? twilioSid : undefined,
+        twilio_auth: provider === "twilio" ? twilioAuth : undefined,
+        aws_access_key: provider === "polly" ? awsAccessKey : undefined,
+        aws_secret_key: provider === "polly" ? awsSecretKey : undefined,
+        aws_region: provider === "polly" ? awsRegion : undefined,
       });
 
       if (!result.success || !result.audioUrl || !result.s3_key) {
@@ -266,6 +299,20 @@ export default function CreatePage() {
                 text={text}
                 isGenerating={isGenerating}
                 onGenerate={generateSpeech}
+                provider={provider}
+                setProvider={setProvider}
+                selectedVoiceId={selectedVoiceId}
+                setSelectedVoiceId={setSelectedVoiceId}
+                twilioSid={twilioSid}
+                setTwilioSid={setTwilioSid}
+                twilioAuth={twilioAuth}
+                setTwilioAuth={setTwilioAuth}
+                awsAccessKey={awsAccessKey}
+                setAwsAccessKey={setAwsAccessKey}
+                awsSecretKey={awsSecretKey}
+                setAwsSecretKey={setAwsSecretKey}
+                awsRegion={awsRegion}
+                setAwsRegion={setAwsRegion}
               />
             </div>
             <div className="order-1 space-y-2 sm:space-y-3 lg:order-2 lg:col-span-2">

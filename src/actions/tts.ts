@@ -8,10 +8,19 @@ import { db } from "~/server/db";
 
 interface GenerateSpeechData {
   text: string;
-  voice_S3_key: string;
+  voice_S3_key?: string; // Optional for non-chatterbox providers
   language: string;
   exaggeration: number;
   cfg_weight: number;
+  // New fields for multi-provider support
+  provider?: string; // 'chatterbox' | 'twilio' | 'polly'
+  voice_id?: string; // Provider-specific voice ID
+  // Pass-through credentials (never stored)
+  twilio_sid?: string;
+  twilio_auth?: string;
+  aws_access_key?: string;
+  aws_secret_key?: string;
+  aws_region?: string;
 }
 
 interface GenerateSpeechResult {
@@ -46,8 +55,17 @@ export async function generateSpeech(
     if (!session?.user?.id) {
       return { success: false, error: "Unauthorized" };
     }
-    if (!data.text || !data.voice_S3_key || !data.language) {
+    if (!data.text || !data.language) {
       return { success: false, error: "Missing required fields" };
+    }
+    
+    // Validate provider-specific requirements
+    const provider = (data.provider || "chatterbox").toLowerCase();
+    if (provider === "chatterbox" && !data.voice_S3_key) {
+      return { success: false, error: "Voice S3 key required for Chatterbox provider" };
+    }
+    if ((provider === "twilio" || provider === "polly") && !data.voice_id) {
+      return { success: false, error: "Voice ID required for selected provider" };
     }
 
     const creditsNeeded = Math.max(1, Math.ceil(data.text.length / 100));
@@ -77,10 +95,18 @@ export async function generateSpeech(
       },
       body: JSON.stringify({
         text: data.text,
-        voice_S3_key: data.voice_S3_key,
+        voice_s3_key: data.voice_S3_key,
         language: data.language,
         exaggeration: data.exaggeration ?? 0.5,
         cfg_weight: data.cfg_weight ?? 0.5,
+        provider: provider,
+        voice_id: data.voice_id,
+        // Pass-through credentials (never stored)
+        twilio_sid: data.twilio_sid,
+        twilio_auth: data.twilio_auth,
+        aws_access_key: data.aws_access_key,
+        aws_secret_key: data.aws_secret_key,
+        aws_region: data.aws_region,
       }),
     });
 
@@ -88,7 +114,27 @@ export async function generateSpeech(
       return { success: false, error: "Failed to generate speech" };
     }
 
-    const result = (await response.json()) as { s3_Key: string };
+    const result = (await response.json()) as { 
+      success: boolean;
+      s3_Key?: string;
+      error?: string;
+      code?: string;
+    };
+    
+    // Handle backend error responses
+    if (!result.success) {
+      return {
+        success: false,
+        error: result.error || "Failed to generate speech",
+      };
+    }
+    
+    if (!result.s3_Key) {
+      return {
+        success: false,
+        error: "No audio file returned from backend",
+      };
+    }
 
     const s3BucketUrl = getS3BucketUrl();
     const audioUrl = `${s3BucketUrl}/${result.s3_Key}`;

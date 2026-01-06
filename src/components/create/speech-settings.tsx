@@ -1,12 +1,13 @@
 "use client";
 
-import { Globe, Volume2, Upload, Settings, Loader2 } from "lucide-react";
+import { Globe, Volume2, Upload, Settings, Loader2, Key } from "lucide-react";
 
 import { Card, CardContent } from "~/components/ui/card";
 
 import { Button } from "~/components/ui/button";
 
 import type { Language, VoiceFile, UploadedVoice } from "~/types/tts";
+import { voices, type Voice, type VoiceProvider } from "~/lib/voices";
 
 interface SpeechSettingsProps {
   languages: Language[];
@@ -25,6 +26,22 @@ interface SpeechSettingsProps {
   text: string;
   isGenerating: boolean;
   onGenerate: () => void;
+  // Multi-provider support
+  provider: VoiceProvider;
+  setProvider: (provider: VoiceProvider) => void;
+  selectedVoiceId: string;
+  setSelectedVoiceId: (voiceId: string) => void;
+  // Credentials
+  twilioSid: string;
+  setTwilioSid: (sid: string) => void;
+  twilioAuth: string;
+  setTwilioAuth: (auth: string) => void;
+  awsAccessKey: string;
+  setAwsAccessKey: (key: string) => void;
+  awsSecretKey: string;
+  setAwsSecretKey: (secret: string) => void;
+  awsRegion: string;
+  setAwsRegion: (region: string) => void;
 }
 
 export default function SpeechSettings({
@@ -44,8 +61,28 @@ export default function SpeechSettings({
   text,
   isGenerating,
   onGenerate,
+  provider,
+  setProvider,
+  selectedVoiceId,
+  setSelectedVoiceId,
+  twilioSid,
+  setTwilioSid,
+  twilioAuth,
+  setTwilioAuth,
+  awsAccessKey,
+  setAwsAccessKey,
+  awsSecretKey,
+  setAwsSecretKey,
+  awsRegion,
+  setAwsRegion,
 }: SpeechSettingsProps) {
   const creditsNeeded = Math.max(1, Math.ceil(text.length / 100));
+  
+  // Get available voices for selected provider
+  const availableVoices = provider === "chatterbox" 
+    ? [] // Chatterbox uses uploaded voices
+    : voices.filter(v => v.provider === provider);
+  
   return (
     <Card className="shadow-lg">
       <CardContent className="p-2 sm:p-3">
@@ -58,6 +95,26 @@ export default function SpeechSettings({
           </div>
         </div>
         <div className="space-y-3">
+          {/* Provider Selection */}
+          <div>
+            <label className="mb-1 flex items-center gap-1 text-xs font-semibold">
+              <Settings className="h-3 w-3" />
+              TTS Provider
+            </label>
+            <select
+              value={provider}
+              onChange={(e) => {
+                setProvider(e.target.value as VoiceProvider);
+                setSelectedVoiceId(""); // Reset voice selection when provider changes
+              }}
+              className="border-input bg-background w-full rounded-md border px-2 py-1.5 text-xs"
+            >
+              <option value="chatterbox">AI (Chatterbox)</option>
+              <option value="twilio">Twilio</option>
+              <option value="polly">Amazon Polly</option>
+            </select>
+          </div>
+          
           <div>
             <label className="mb-1 flex items-center gap-1 text-xs font-semibold">
               <Globe className="h-3 w-3" />
@@ -75,30 +132,131 @@ export default function SpeechSettings({
               ))}
             </select>
           </div>
-          <div>
-            <label className="mb-1 flex items-center gap-1 text-xs font-semibold">
-              <Volume2 className="h-3 w-3" />
-              Voice
-            </label>
-            <select
-              value={selectedVoice}
-              onChange={(e) => setSelectedVoice(e.target.value)}
-              className="border-input bg-background w-full rounded-md border px-2 py-1.5 text-xs"
-            >
-              {/* User's uploaded voices */}
-              {userUploadedVoices.map((voice) => (
-                <option key={voice.id} value={voice.s3Key}>
-                  🎤 {voice.name}
-                </option>
-              ))}
-              {/* Default voices */}
-              {voiceFiles.map((voice) => (
-                <option key={voice.s3_key} value={voice.s3_key}>
-                  {voice.name}
-                </option>
-              ))}
-            </select>
-          </div>
+          {/* Voice Selection - Different for each provider */}
+          {provider === "chatterbox" ? (
+            <div>
+              <label className="mb-1 flex items-center gap-1 text-xs font-semibold">
+                <Volume2 className="h-3 w-3" />
+                Voice
+              </label>
+              <select
+                value={selectedVoice}
+                onChange={(e) => setSelectedVoice(e.target.value)}
+                className="border-input bg-background w-full rounded-md border px-2 py-1.5 text-xs"
+              >
+                {/* User's uploaded voices */}
+                {userUploadedVoices.map((voice) => (
+                  <option key={voice.id} value={voice.s3Key}>
+                    🎤 {voice.name}
+                  </option>
+                ))}
+                {/* Default voices */}
+                {voiceFiles.map((voice) => (
+                  <option key={voice.s3_key} value={voice.s3_key}>
+                    {voice.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          ) : (
+            <div>
+              <label className="mb-1 flex items-center gap-1 text-xs font-semibold">
+                <Volume2 className="h-3 w-3" />
+                Voice
+              </label>
+              <select
+                value={selectedVoiceId}
+                onChange={(e) => setSelectedVoiceId(e.target.value)}
+                className="border-input bg-background w-full rounded-md border px-2 py-1.5 text-xs"
+              >
+                <option value="">Select a voice...</option>
+                {availableVoices.map((voice) => (
+                  <option key={voice.id} value={voice.providerVoiceId}>
+                    {voice.name} ({voice.language}) - {voice.gender}
+                  </option>
+                ))}
+              </select>
+              {selectedVoiceId && (
+                <p className="mt-1 text-xs text-gray-500">
+                  {availableVoices.find(v => v.providerVoiceId === selectedVoiceId)?.description}
+                </p>
+              )}
+            </div>
+          )}
+          
+          {/* Twilio Credentials */}
+          {provider === "twilio" && (
+            <div className="space-y-2 rounded-md border border-blue-200 bg-blue-50 p-2">
+              <label className="mb-1 flex items-center gap-1 text-xs font-semibold text-blue-900">
+                <Key className="h-3 w-3" />
+                Twilio Credentials
+              </label>
+              <div>
+                <input
+                  type="text"
+                  placeholder="Account SID"
+                  value={twilioSid}
+                  onChange={(e) => setTwilioSid(e.target.value)}
+                  className="border-input bg-background w-full rounded-md border px-2 py-1.5 text-xs"
+                />
+              </div>
+              <div>
+                <input
+                  type="password"
+                  placeholder="Auth Token"
+                  value={twilioAuth}
+                  onChange={(e) => setTwilioAuth(e.target.value)}
+                  className="border-input bg-background w-full rounded-md border px-2 py-1.5 text-xs"
+                />
+              </div>
+              <p className="text-xs text-blue-700">
+                Credentials are never stored and only used for this request.
+              </p>
+            </div>
+          )}
+          
+          {/* AWS/Polly Credentials */}
+          {provider === "polly" && (
+            <div className="space-y-2 rounded-md border border-orange-200 bg-orange-50 p-2">
+              <label className="mb-1 flex items-center gap-1 text-xs font-semibold text-orange-900">
+                <Key className="h-3 w-3" />
+                AWS Credentials
+              </label>
+              <div>
+                <input
+                  type="text"
+                  placeholder="AWS Access Key ID"
+                  value={awsAccessKey}
+                  onChange={(e) => setAwsAccessKey(e.target.value)}
+                  className="border-input bg-background w-full rounded-md border px-2 py-1.5 text-xs"
+                />
+              </div>
+              <div>
+                <input
+                  type="password"
+                  placeholder="AWS Secret Access Key"
+                  value={awsSecretKey}
+                  onChange={(e) => setAwsSecretKey(e.target.value)}
+                  className="border-input bg-background w-full rounded-md border px-2 py-1.5 text-xs"
+                />
+              </div>
+              <div>
+                <select
+                  value={awsRegion}
+                  onChange={(e) => setAwsRegion(e.target.value)}
+                  className="border-input bg-background w-full rounded-md border px-2 py-1.5 text-xs"
+                >
+                  <option value="us-east-1">US East (N. Virginia)</option>
+                  <option value="us-west-2">US West (Oregon)</option>
+                  <option value="eu-west-1">Europe (Ireland)</option>
+                  <option value="ap-southeast-2">Asia Pacific (Sydney)</option>
+                </select>
+              </div>
+              <p className="text-xs text-orange-700">
+                Credentials are never stored and only used for this request.
+              </p>
+            </div>
+          )}
           <div>
             <label className="mb-1 flex items-center gap-1 text-xs font-semibold">
               <Upload className="h-3 w-3" />
