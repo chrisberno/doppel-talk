@@ -5,14 +5,11 @@ from typing import Optional
 import uuid
 import re
 
-import modal 
-from pydantic import BaseModel 
-import torch
-import torchaudio
-import boto3
-from botocore.exceptions import ClientError, BotoCoreError
-from twilio.rest import Client as TwilioClient
-from twilio.base.exceptions import TwilioRestException
+import modal
+from pydantic import BaseModel
+
+# Heavy imports are done inside the Modal container, not locally
+# This allows `modal deploy` to work without torch installed locally
 
 # Get Modal app name from environment, with fallback
 MODAL_APP_NAME = os.environ.get("MODAL_APP_NAME", "doppel-talk")
@@ -88,17 +85,20 @@ class TextToSpeachServer:
 
     def _validate_twilio_credentials(self, sid: str, auth: str) -> bool:
         """Validate Twilio credentials format and authenticity"""
+        from twilio.rest import Client as TwilioClient
+        from twilio.base.exceptions import TwilioRestException
+
         if not sid or not auth:
             return False
-        
+
         # Validate format: SID starts with "AC" and is 34 chars
         if not sid.startswith("AC") or len(sid) != 34:
             return False
-        
+
         # Auth token should be 32 chars
         if len(auth) != 32:
             return False
-        
+
         try:
             client = TwilioClient(sid, auth)
             # Make a simple API call to validate
@@ -112,10 +112,10 @@ class TextToSpeachServer:
             return False
 
     def _generate_twilio_tts(
-        self, 
-        text: str, 
-        voice_id: str, 
-        twilio_sid: str, 
+        self,
+        text: str,
+        voice_id: str,
+        twilio_sid: str,
         twilio_auth: str,
         aws_access_key: Optional[str],
         aws_secret_key: Optional[str],
@@ -125,6 +125,8 @@ class TextToSpeachServer:
         Generate TTS using Twilio (which uses AWS Polly under the hood).
         Validates Twilio credentials first, then uses AWS Polly directly.
         """
+        import boto3
+        from botocore.exceptions import ClientError, BotoCoreError
         # Validate Twilio credentials
         if not self._validate_twilio_credentials(twilio_sid, twilio_auth):
             raise ValueError("Invalid Twilio credentials")
@@ -178,6 +180,9 @@ class TextToSpeachServer:
         aws_region: str
     ) -> bytes:
         """Generate TTS using Amazon Polly directly"""
+        import boto3
+        from botocore.exceptions import ClientError, BotoCoreError
+
         if not aws_access_key or not aws_secret_key:
             raise ValueError("AWS credentials required for Polly provider")
         
@@ -226,8 +231,11 @@ class TextToSpeachServer:
         cfg_weight: float
     ) -> bytes:
         """Generate TTS using Chatterbox AI (existing implementation)"""
+        import torch
+        import torchaudio
+
         self._load_chatterbox_model()
-        
+
         with torch.no_grad():
             if voice_s3_key:
                 audio_prompt_path = f"/s3-mount/{voice_s3_key}"
