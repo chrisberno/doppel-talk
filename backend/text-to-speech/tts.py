@@ -63,13 +63,13 @@ AWS_S3_BUCKET_NAME = os.environ.get("AWS_S3_BUCKET_NAME", MODAL_APP_NAME)
     image=image,
     gpu="L40S",
     volumes={
-        "/root/.cache/huppingface": volume,
+        "/root/.cache/huggingface": volume,
         "/s3-mount": modal.CloudBucketMount(AWS_S3_BUCKET_NAME, secret=s3_secret)
     },
     scaledown_window=120,
     secrets=[s3_secret]
 )
-class TextToSpeachServer:
+class TextToSpeechServer:
     @modal.enter()
     def load_model(self):
         # Only load Chatterbox model if needed (lazy loading per provider)

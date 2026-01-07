@@ -1,6 +1,6 @@
-# Doppel Center v2.0 — Open Issues & TODOs
+# Doppel Talk v2.0 — Open Issues & TODOs
 
-> **Last Updated:** 2026-01-06
+> **Last Updated:** 2026-01-07
 > **Sprint:** v2.0 Initial Build
 
 ---
@@ -40,17 +40,70 @@ No public ETA for React 19 support. Recommended deferring adoption.
 
 ---
 
+### 2. Polar Payment Integration
+
+**Status:** Placeholder credentials only
+**Date Identified:** 2026-01-07
+
+**Issue:**
+Polar.sh payment integration not configured. Using placeholder values:
+- `POLAR_ACCESS_TOKEN=polar_placeholder_token`
+- `POLAR_WEBHOOK_SECRET=polar_placeholder_secret`
+
+**Action Required:**
+1. Create Polar.sh account at https://polar.sh
+2. Generate API access token
+3. Configure webhook endpoint
+4. Update Vercel environment variables with real values
+
+---
+
+### 3. AWS S3 Bucket Notifications
+
+**Status:** Not configured
+**Date Identified:** 2026-01-07
+
+**Issue:**
+S3 bucket `doppel-talk` needs event notifications configured to send updates to chris@chrisberno.dev
+
+**Action Required:**
+1. Configure S3 bucket event notifications (SNS or Lambda)
+2. Set up email notifications for object creation/deletion
+3. Or use CloudWatch alarms for bucket activity
+
+---
+
 ## TODO (Post-Sprint)
 
+### High Priority
+- [ ] Configure Polar.sh payment integration with real credentials
+- [ ] Set up S3 bucket notifications to chris@chrisberno.dev
+- [ ] Fix doppel.center (currently broken on Render)
+- [ ] Test TTS generation end-to-end with Modal backend
+- [ ] Test authentication flow (sign up, sign in, sign out)
+
+### Medium Priority
 - [ ] Retrofit Twilio Paste components when React 19 supported
-- [ ] Update infrastructure references (`ai-voice-studio-sahand`) to production values
-- [ ] Configure production S3 bucket and Modal app
-- [ ] Set up Vercel environment variables for production deploy
+- [ ] Add www.doppel.talk redirect to doppel.talk
+- [ ] Configure proper CORS on S3 bucket if needed
+- [ ] Set up error monitoring (Sentry or similar)
+
+### Low Priority
+- [ ] Update Prisma to v7 (major version upgrade available)
+- [ ] Clean up baseline-browser-mapping deprecation warning
+- [ ] Add production logging/monitoring
 
 ---
 
 ## Completed Issues
 
-_(Move resolved items here with resolution date)_
+### Infrastructure Setup (2026-01-07)
+- [x] Configure production S3 bucket (`doppel-talk`)
+- [x] Configure Modal backend deployment
+- [x] Set up Vercel environment variables
+- [x] Configure GitHub auto-deploy (push to main)
+- [x] Configure doppel.talk custom domain
+- [x] Rename branch from v2 to main
+- [x] Create separate doppel-talk GitHub repo
 
 ---
