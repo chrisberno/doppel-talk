@@ -101,6 +101,22 @@ To configure custom domain in Vercel:
 
 ---
 
+## GitHub Auto-Deploy Setup
+
+**Status:** CONFIGURED ✓
+
+For auto-deploy on push (preferred workflow):
+
+1. Connect GitHub to Vercel account: https://vercel.com/account/login-connections
+2. Run: `vercel git connect https://github.com/chrisberno/doppel-talk`
+3. Set production branch to `main` in Project Settings → Environments
+
+Once configured, pushing to `main` will auto-trigger production builds.
+
+**DO NOT use `vercel --prod` CLI deploys** - use git push instead.
+
+---
+
 ## Post-Deployment Verification
 
 After deployment, verify:
