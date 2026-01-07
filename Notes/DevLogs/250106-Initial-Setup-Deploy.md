@@ -7,6 +7,22 @@
 
 ---
 
+## Sprint Status
+
+| Phase | Status | Description |
+|-------|--------|-------------|
+| Phase 0 | ✅ Complete | Initial branding |
+| Phase 0.5 | ✅ Complete | Parameterize infra refs |
+| Phase 1 | ✅ Complete | Backend TTS Providers |
+| Phase 1.5 | ✅ Complete | Paste foundation |
+| Phase 2 | ✅ Complete | Provider selector, voice library |
+| Phase 3 | ✅ Complete | IVR/Twilio Exports |
+| Phase 4 | 🔜 In Progress | Database & Enhancements |
+| Phase 5 | ⏸️ Deferred | UI Refactor (Twilio Paste) — *blocked by React 19, see OPEN-ISSUES.md* |
+| Phase 6 | ⬜ Pending | Polish & Vercel Readiness |
+
+---
+
 ## Executive Summary
 
 Successfully deployed Doppel Talk v2.0 to production at **https://doppel.talk**. This devlog documents the complete setup process, issues encountered, solutions applied, and lessons learned for future agent reference.
@@ -254,6 +270,9 @@ doppel.talk/
 3. Test full TTS generation end-to-end
 4. Consider doppel.center migration to Vercel
 5. Switch to Polar production when ready to launch
+
+**Note on Phase 5 (Twilio Paste UI Refactor):**
+Phase 5 is **deferred, not skipped**. It's blocked by Twilio Paste's lack of React 19 support. When Paste releases React 19 compatibility, this phase should be revisited to retrofit the UI with Paste components. See `OPEN-ISSUES.md` for full details and monitoring plan.
 
 ---
 
