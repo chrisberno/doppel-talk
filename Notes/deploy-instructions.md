@@ -22,6 +22,8 @@ vercel logout
 vercel login
 ```
 
+**WARNING:** During initial setup, we nearly deployed to the wrong account. This check is critical.
+
 ### 2. Verify Project Linking
 
 Check if the project is linked to the correct Vercel project:
@@ -30,7 +32,7 @@ Check if the project is linked to the correct Vercel project:
 vercel ls
 ```
 
-Look for `doppel.talk` or `doppel-talk` in the list. If not present or linked to wrong project:
+Look for `doppel.talk` in the list. If not present or linked to wrong project:
 
 ```bash
 rm -rf .vercel
@@ -41,79 +43,87 @@ Follow prompts to link to the correct project/team.
 
 ---
 
+## Recommended Deployment Workflow
+
+### Standard Deploy (PREFERRED)
+```bash
+git add .
+git commit -m "your message"
+git push origin main
+```
+
+GitHub auto-deploy is configured. Pushing to `main` triggers production build automatically.
+
+**DO NOT use `vercel --prod` CLI deploys unless absolutely necessary.**
+
+### Modal Backend Deploy
+```bash
+cd backend/text-to-speech
+modal deploy tts.py
+```
+
+**Important:** If you rename the Modal class, the endpoint URL changes. You must update `MODAL_API_URL` in Vercel.
+
+---
+
 ## Environment Variables
 
-The following environment variables MUST be configured in Vercel before production deployment:
+The following environment variables are configured in Vercel Production:
 
 ### Database (Neon)
 - `DATABASE_URL` - Neon PostgreSQL connection string
 
 ### Auth (Better Auth)
 - `BETTER_AUTH_SECRET` - Secure random string (32+ chars)
-- `BETTER_AUTH_URL` - Production URL (e.g., `https://doppel.talk`)
+- `BETTER_AUTH_URL` - `https://doppel.talk`
 
-### Payments (Polar) - Optional for MVP
-- `POLAR_ACCESS_TOKEN`
-- `POLAR_WEBHOOK_SECRET`
+### Payments (Polar)
+- `POLAR_ACCESS_TOKEN` - **Must be from sandbox.polar.sh** (code uses `server: "sandbox"`)
+- `POLAR_WEBHOOK_SECRET` - From sandbox.polar.sh webhook
 
 ### AWS (S3 + Polly)
 - `AWS_ACCESS_KEY_ID`
 - `AWS_SECRET_ACCESS_KEY`
-- `AWS_REGION` (default: `us-east-1`)
-- `AWS_S3_BUCKET_NAME` (e.g., `doppel-talk`)
-- `AWS_S3_BUCKET_URL` (e.g., `https://doppel-talk.s3.us-east-1.amazonaws.com`)
+- `AWS_REGION` - `us-east-1`
+- `AWS_S3_BUCKET_NAME` - `doppel-talk`
 
 ### Modal Backend
-- `MODAL_API_URL` - Full endpoint URL (format: `https://{workspace}--{app}-{class}-{method}.modal.run`)
+- `MODAL_API_URL` - `https://chris-9774--doppel-talk-texttospeechserver-generate-speech.modal.run`
 - `MODAL_API_KEY` - Modal token ID (starts with `ak-`)
 - `MODAL_API_SECRET` - Modal token secret (starts with `as-`)
-- `MODAL_APP_NAME` - App name (e.g., `doppel-talk`)
-
----
-
-## Deployment Commands
-
-### Preview Deployment (Staging)
-```bash
-vercel
-```
-
-### Production Deployment
-```bash
-vercel --prod
-```
-
-### With Auto-Confirm (use with caution)
-```bash
-vercel --prod --yes
-```
 
 ---
 
 ## Domain Configuration
 
-Production domain: `doppel.talk`
+**Production domain:** `doppel.talk` (configured and working)
 
-To configure custom domain in Vercel:
-1. Go to Project Settings > Domains
-2. Add `doppel.talk`
-3. Configure DNS records as instructed by Vercel
+DNS managed at Spaceship. Vercel handles SSL automatically.
 
 ---
 
-## GitHub Auto-Deploy Setup
+## GitHub Auto-Deploy
 
 **Status:** CONFIGURED ✓
 
-For auto-deploy on push (preferred workflow):
+- **Repository:** https://github.com/chrisberno/doppel-talk
+- **Branch:** `main`
+- **Trigger:** Push to main → Production build
 
-1. Connect GitHub to Vercel account: https://vercel.com/account/login-connections
-2. Run: `vercel git connect https://github.com/chrisberno/doppel-talk`
-3. Set production branch to `main` in Project Settings → Environments
+---
 
-Once configured, pushing to `main` will auto-trigger production builds.
+## Modal Backend Details
 
-**DO NOT use `vercel --prod` CLI deploys** - use git push instead.
+| Field | Value |
+|-------|-------|
+| Workspace | `chris-9774` |
+| App Name | `doppel-talk` |
+| Class | `TextToSpeechServer` |
+| Method | `generate_speech` |
+| GPU | L40S |
+| Auth | `requires_proxy_auth=True` |
+
+**Endpoint URL:** `https://chris-9774--doppel-talk-texttospeechserver-generate-speech.modal.run`
 
 ---
 
@@ -121,35 +131,32 @@ Once configured, pushing to `main` will auto-trigger production builds.
 
 After deployment, verify:
 
-1. [ ] Site loads at production URL
-2. [ ] Authentication flow works (sign up, sign in)
-3. [ ] Database connection is active
-4. [ ] S3 uploads work
-5. [ ] Modal TTS endpoint responds
-
----
-
-## Modal Backend Details
-
-**Workspace:** `chris-9774`
-**App Name:** `doppel-talk`
-**Endpoint URL Pattern:** `https://chris-9774--doppel-talk-texttospeachserver-generate-speech.modal.run`
-
-Note: The endpoint uses `requires_proxy_auth=True`, so requests must include Modal authentication headers.
+1. [x] Site loads at https://doppel.talk
+2. [x] Sign up flow works
+3. [x] Sign in/out works
+4. [ ] TTS generation works (UI not built yet)
+5. [ ] Credit purchase works (not tested yet)
 
 ---
 
 ## Troubleshooting
 
+### Polar "invalid_token" error
+**Cause:** Token created at polar.sh (production) but code uses `server: "sandbox"`
+**Fix:** Create token at https://sandbox.polar.sh
+
+### Modal endpoint 404
+**Cause:** Class name typo or mismatch
+**Fix:** Check class name in tts.py matches URL, redeploy Modal, update `MODAL_API_URL`
+
+### Vercel SSO blocking access
+**Fix:** Disable SSO protection via Vercel dashboard or API
+
+### Wrong Vercel account
+**Fix:** `vercel logout && vercel login`, ensure correct browser/account
+
 ### "EPIPE" or upload failures
-- Network issue. Retry the deployment command.
-
-### Wrong project linked
-- Delete `.vercel` folder and re-link with `vercel link`
-
-### Environment variables not loading
-- Check Vercel dashboard > Project Settings > Environment Variables
-- Ensure variables are set for "Production" environment
+**Fix:** Network issue, retry the deployment command
 
 ---
 
@@ -158,10 +165,18 @@ Note: The endpoint uses `requires_proxy_auth=True`, so requests must include Mod
 **REQUIRED:** Before deploying, agents must confirm:
 
 1. "I have verified the Vercel account with `vercel whoami`"
-2. "I have confirmed the target account with the user"
-3. "I have reviewed all environment variables are configured"
+2. "I have confirmed the target account is `chrisberno-dev`"
+3. "I understand Polar uses sandbox environment"
+4. "I have read the devlog at `/Notes/DevLogs/250106-Initial-Setup-Deploy.md`"
 
 ---
 
-*Last updated: 2026-01-06*
+## Related Documentation
+
+- [Open Issues](./OPEN-ISSUES.md)
+- [Initial Devlog](./DevLogs/250106-Initial-Setup-Deploy.md)
+
+---
+
+*Last updated: 2026-01-07*
 *Created by: CTO Agent*
