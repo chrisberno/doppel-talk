@@ -1,0 +1,273 @@
+// Doppel Talk v2.0 Architecture Diagram
+// Paste this into Eraser.io diagram view
+
+// Entry Point
+start [shape: oval, label: "start"]
+create-t3 [shape: rectangle, label: "npm create t3-app@latest"]
+
+start -> create-t3
+
+// Root Project
+doppel-talk [shape: folder, label: "doppel.talk", color: yellow]
+create-t3 -> doppel-talk
+
+// Top Level Directories
+public [shape: folder, label: "public", color: yellow]
+src [shape: folder, label: "src", color: yellow]
+prisma [shape: folder, label: "prisma", color: yellow]
+backend [shape: folder, label: "backend", color: yellow]
+notes [shape: folder, label: "Notes", color: yellow]
+config [shape: folder, label: "config files", color: yellow]
+env [shape: file, label: ".env"]
+
+doppel-talk -> public
+doppel-talk -> src
+doppel-talk -> prisma
+doppel-talk -> backend
+doppel-talk -> notes
+doppel-talk -> config
+doppel-talk -> env
+
+// Prisma
+schema-prisma [shape: file, label: "schema.prisma", color: blue]
+prisma -> schema-prisma
+
+// Backend (Modal)
+tts-folder [shape: folder, label: "text-to-speech", color: yellow]
+backend -> tts-folder
+tts-py [shape: file, label: "tts.py", color: green]
+requirements [shape: file, label: "requirements.txt"]
+tts-folder -> tts-py
+tts-folder -> requirements
+
+// Notes
+devlogs [shape: folder, label: "DevLogs", color: yellow]
+open-issues [shape: file, label: "OPEN-ISSUES.md"]
+deploy-instructions [shape: file, label: "deploy-instructions.md"]
+notes -> devlogs
+notes -> open-issues
+notes -> deploy-instructions
+
+// Src Structure
+lib [shape: folder, label: "lib", color: yellow]
+actions [shape: folder, label: "actions", color: yellow]
+app [shape: folder, label: "app", color: yellow]
+components [shape: folder, label: "components", color: yellow]
+server [shape: folder, label: "server", color: yellow]
+hooks [shape: folder, label: "hooks", color: yellow]
+types [shape: folder, label: "types", color: yellow]
+
+src -> lib
+src -> actions
+src -> app
+src -> components
+src -> server
+src -> hooks
+src -> types
+
+// Lib Files
+utils-ts [shape: file, label: "utils.ts", color: blue]
+auth-ts [shape: file, label: "auth.ts", color: blue]
+auth-client-ts [shape: file, label: "auth-client.ts", color: blue]
+voices-ts [shape: file, label: "voices.ts", color: blue]
+sanitize-ts [shape: file, label: "sanitize.ts", color: blue]
+credential-validation [shape: file, label: "credential-validation.ts", color: blue]
+
+lib -> utils-ts
+lib -> auth-ts
+lib -> auth-client-ts
+lib -> voices-ts
+lib -> sanitize-ts
+lib -> credential-validation
+
+// Actions
+tts-action [shape: file, label: "tts.ts", color: blue]
+voice-upload [shape: file, label: "voice-upload.tsx", color: blue]
+export-action [shape: file, label: "export.ts", color: blue]
+
+actions -> tts-action
+actions -> voice-upload
+actions -> export-action
+
+// Server
+db-ts [shape: file, label: "db.ts", color: blue]
+server -> db-ts
+
+// Hooks
+use-mobile [shape: file, label: "use-mobile.ts", color: blue]
+hooks -> use-mobile
+
+// Types
+tts-types [shape: file, label: "tts.ts", color: blue]
+types -> tts-types
+
+// App Router Structure
+root-layout [shape: file, label: "layout.tsx", color: cyan]
+root-page [shape: file, label: "page.tsx", color: cyan]
+dashboard-group [shape: folder, label: "(dashboard)", color: yellow]
+auth-group [shape: folder, label: "(auth)", color: yellow]
+api-folder [shape: folder, label: "api", color: yellow]
+
+app -> root-layout
+app -> root-page
+app -> dashboard-group
+app -> auth-group
+app -> api-folder
+
+// Home Page
+home-page [shape: page, label: "/ \nHome page", color: cyan]
+root-page -> home-page
+
+// Dashboard Group
+dashboard-folder [shape: folder, label: "dashboard", color: yellow]
+dashboard-layout [shape: file, label: "layout.tsx", color: cyan]
+dashboard-group -> dashboard-folder
+dashboard-group -> dashboard-layout
+
+dashboard-page [shape: file, label: "page.tsx", color: cyan]
+create-folder [shape: folder, label: "create", color: yellow]
+settings-folder [shape: folder, label: "settings", color: yellow]
+projects-folder [shape: folder, label: "projects", color: yellow]
+customer-portal-folder [shape: folder, label: "customer-portal", color: yellow]
+
+dashboard-folder -> dashboard-page
+dashboard-folder -> create-folder
+dashboard-folder -> settings-folder
+dashboard-folder -> projects-folder
+dashboard-folder -> customer-portal-folder
+
+// Dashboard Pages
+dash-page-label [shape: page, label: "/dashboard\nDash page", color: cyan]
+create-page [shape: file, label: "page.tsx", color: cyan]
+create-page-label [shape: page, label: "/dashboard/create\nCreate page", color: cyan]
+settings-page [shape: file, label: "page.tsx", color: cyan]
+settings-page-label [shape: page, label: "/dashboard/settings\nSettings page", color: cyan]
+projects-page [shape: file, label: "page.tsx", color: cyan]
+projects-page-label [shape: page, label: "/dashboard/projects\nProjects page", color: cyan]
+portal-page [shape: file, label: "page.tsx", color: cyan]
+portal-page-label [shape: page, label: "/dashboard/customer-portal\nCustomer Portal page", color: cyan]
+
+dashboard-page -> dash-page-label
+create-folder -> create-page
+create-page -> create-page-label
+settings-folder -> settings-page
+settings-page -> settings-page-label
+projects-folder -> projects-page
+projects-page -> projects-page-label
+customer-portal-folder -> portal-page
+portal-page -> portal-page-label
+
+// Auth Group
+auth-folder [shape: folder, label: "auth", color: yellow]
+auth-layout [shape: file, label: "layout.tsx", color: cyan]
+auth-path [shape: folder, label: "[path]", color: yellow]
+auth-path-page [shape: file, label: "page.tsx", color: cyan]
+auth-pages [shape: page, label: "auth pages", color: cyan]
+
+auth-group -> auth-folder
+auth-group -> auth-layout
+auth-folder -> auth-path
+auth-path -> auth-path-page
+auth-path-page -> auth-pages
+
+// API Routes
+auth-api [shape: folder, label: "auth", color: yellow]
+api-folder -> auth-api
+all-catch [shape: folder, label: "[...all]", color: yellow]
+auth-api -> all-catch
+route-ts [shape: file, label: "route.ts", color: cyan]
+all-catch -> route-ts
+
+// Components
+ui-folder [shape: folder, label: "ui", color: yellow]
+sidebar-folder [shape: folder, label: "sidebar", color: yellow]
+create-components [shape: folder, label: "create", color: yellow]
+
+components -> ui-folder
+components -> sidebar-folder
+components -> create-components
+
+// Database Schema (Entity boxes on right side)
+verification-entity [shape: class, label: "Verification"] {
+  id string pk
+  identifier string
+  value string
+  expiresAt datetime
+  createdAt datetime
+  updatedAt datetime
+}
+
+session-entity [shape: class, label: "Session"] {
+  id string pk
+  expiresAt datetime
+  token string
+  createdAt datetime
+  updatedAt datetime
+  ipAddress string
+  userAgent string
+  userId string fk
+}
+
+account-entity [shape: class, label: "Account"] {
+  id string pk
+  accountId string
+  providerId string
+  accessToken string
+  refreshToken string
+  refreshTokenExpiresAt datetime
+  scope string
+  password string
+  createdAt datetime
+  updatedAt datetime
+  userId string fk
+}
+
+audio-project-entity [shape: class, label: "AudioProject"] {
+  id string pk
+  name string
+  text string
+  audioUrl string
+  s3Key string
+  language string
+  voiceS3Key string
+  exaggeration float
+  cfgWeight float
+  provider string
+  voiceId string
+  voiceConfig json
+  exportCount int
+  lastExportedAt datetime
+  createdAt datetime
+  updatedAt datetime
+  userId string fk
+}
+
+user-entity [shape: class, label: "User"] {
+  id string pk
+  name string
+  email string
+  createdAt datetime
+  emailVerified boolean
+  image string
+  updatedAt datetime
+  credits int
+  audioProjects AudioProject[]
+  uploadedVoices UploadedVoice[]
+}
+
+uploaded-voice-entity [shape: class, label: "UploadedVoice"] {
+  id string pk
+  userId string fk
+  name string
+  s3Key string
+  url string
+  createdAt datetime
+  updatedAt datetime
+}
+
+// External Services (bottom)
+vercel [shape: cloud, label: "Vercel\n(Frontend)", color: purple]
+modal [shape: cloud, label: "Modal\n(GPU Backend)", color: purple]
+neon [shape: database, label: "Neon\n(PostgreSQL)", color: purple]
+s3 [shape: cylinder, label: "AWS S3\n(Storage)", color: purple]
+polar [shape: cloud, label: "Polar.sh\n(Payments)", color: purple]
