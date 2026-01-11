@@ -8,19 +8,17 @@ import { db } from "~/server/db";
 
 interface GenerateSpeechData {
   text: string;
-  voice_S3_key?: string; // Optional for non-chatterbox providers
+  voice_S3_key?: string; // Required for Chatterbox provider
   language: string;
   exaggeration: number;
   cfg_weight: number;
-  // New fields for multi-provider support
-  provider?: string; // 'chatterbox' | 'twilio' | 'polly'
-  voice_id?: string; // Provider-specific voice ID
-  // Pass-through credentials (never stored)
-  twilio_sid?: string;
-  twilio_auth?: string;
-  aws_access_key?: string;
-  aws_secret_key?: string;
-  aws_region?: string;
+  provider?: string; // Defaults to 'chatterbox'
+  // Metadata fields
+  name?: string;
+  type?: string; // "ivr", "greeting", "announcement", "promo"
+  department?: string; // "sales", "support", "hr", "marketing"
+  function?: string; // "on-hold", "voicemail", "menu-prompt"
+  tags?: string[];
 }
 
 interface GenerateSpeechResult {
@@ -59,13 +57,13 @@ export async function generateSpeech(
       return { success: false, error: "Missing required fields" };
     }
     
-    // Validate provider-specific requirements
+    // Validate Chatterbox provider requirements
     const provider = (data.provider || "chatterbox").toLowerCase();
-    if (provider === "chatterbox" && !data.voice_S3_key) {
-      return { success: false, error: "Voice S3 key required for Chatterbox provider" };
+    if (provider !== "chatterbox") {
+      return { success: false, error: "Only Chatterbox provider is supported" };
     }
-    if ((provider === "twilio" || provider === "polly") && !data.voice_id) {
-      return { success: false, error: "Voice ID required for selected provider" };
+    if (!data.voice_S3_key) {
+      return { success: false, error: "Voice S3 key required" };
     }
 
     const creditsNeeded = Math.max(1, Math.ceil(data.text.length / 100));
@@ -100,13 +98,6 @@ export async function generateSpeech(
         exaggeration: data.exaggeration ?? 0.5,
         cfg_weight: data.cfg_weight ?? 0.5,
         provider: provider,
-        voice_id: data.voice_id,
-        // Pass-through credentials (never stored)
-        twilio_sid: data.twilio_sid,
-        twilio_auth: data.twilio_auth,
-        aws_access_key: data.aws_access_key,
-        aws_secret_key: data.aws_secret_key,
-        aws_region: data.aws_region,
       }),
     });
 
@@ -144,13 +135,9 @@ export async function generateSpeech(
       data: { credits: { decrement: creditsNeeded } },
     });
 
-    // Store voice config as JSON if available
-    const voiceConfig = data.voice_id
-      ? {
-          voiceId: data.voice_id,
-          provider: provider,
-        }
-      : undefined;
+    // Calculate duration if audio metadata available
+    // For now, we'll leave it null - can be calculated from audio file later
+    const duration = null;
 
     const audioProject = await db.audioProject.create({
       data: {
@@ -162,10 +149,15 @@ export async function generateSpeech(
         exaggeration: data.exaggeration,
         cfgWeight: data.cfg_weight,
         userId: session.user.id,
-        // New v2 fields
         provider: provider,
-        voiceId: data.voice_id || null,
-        voiceConfig: voiceConfig,
+        // Metadata fields
+        name: data.name || null,
+        type: data.type || null,
+        department: data.department || null,
+        function: data.function || null,
+        tags: data.tags || [],
+        status: "active", // Default to active
+        duration: duration,
       },
     });
 
@@ -255,5 +247,131 @@ export async function deleteAudioProject(id: string) {
   } catch (error) {
     console.error("Error deleting audio project:", error);
     return { success: false, error: "Failed to delete audio project" };
+  }
+}
+
+export async function updateAudioProject(
+  id: string,
+  data: {
+    name?: string;
+    type?: string | null;
+    department?: string | null;
+    function?: string | null;
+    status?: string;
+    tags?: string[];
+  },
+) {
+  try {
+    const session = await auth.api.getSession({
+      headers: await headers(),
+    });
+
+    if (!session?.user?.id) {
+      return { success: false, error: "Unauthorized" };
+    }
+
+    const project = await db.audioProject.findUnique({
+      where: { id },
+    });
+
+    if (!project || project.userId !== session.user.id) {
+      return { success: false, error: "Not found or unauthorized" };
+    }
+
+    await db.audioProject.update({
+      where: { id },
+      data,
+    });
+
+    return { success: true };
+  } catch (error) {
+    console.error("Error updating audio project:", error);
+    return { success: false, error: "Failed to update audio project" };
+  }
+}
+
+function generatePublicSlug(): string {
+  // Generate a random slug (8 characters)
+  return Math.random().toString(36).substring(2, 10);
+}
+
+export async function togglePublicSharing(id: string): Promise<{
+  success: boolean;
+  publicSlug?: string;
+  publicUrl?: string;
+  error?: string;
+}> {
+  try {
+    const session = await auth.api.getSession({
+      headers: await headers(),
+    });
+
+    if (!session?.user?.id) {
+      return { success: false, error: "Unauthorized" };
+    }
+
+    const project = await db.audioProject.findUnique({
+      where: { id },
+    });
+
+    if (!project || project.userId !== session.user.id) {
+      return { success: false, error: "Not found or unauthorized" };
+    }
+
+    // Get base URL from environment or use default
+    const baseUrl =
+      process.env.NEXT_PUBLIC_APP_URL ||
+      (process.env.VERCEL_URL
+        ? `https://${process.env.VERCEL_URL}`
+        : "http://localhost:3000");
+    let publicSlug = project.publicSlug;
+    let publicUrl: string | null = null;
+
+    if (project.isPublic) {
+      // Make private
+      await db.audioProject.update({
+        where: { id },
+        data: {
+          isPublic: false,
+          publicSlug: null,
+          publicUrl: null,
+        },
+      });
+      return { success: true };
+    } else {
+      // Make public - generate slug if needed
+      if (!publicSlug) {
+        // Ensure unique slug
+        let attempts = 0;
+        do {
+          publicSlug = generatePublicSlug();
+          const existing = await db.audioProject.findUnique({
+            where: { publicSlug },
+          });
+          if (!existing) break;
+          attempts++;
+        } while (attempts < 10);
+
+        if (attempts >= 10) {
+          return { success: false, error: "Failed to generate unique slug" };
+        }
+      }
+
+      publicUrl = `${baseUrl}/public/${publicSlug}`;
+
+      await db.audioProject.update({
+        where: { id },
+        data: {
+          isPublic: true,
+          publicSlug,
+          publicUrl,
+        },
+      });
+
+      return { success: true, publicSlug, publicUrl };
+    }
+  } catch (error) {
+    console.error("Error toggling public sharing:", error);
+    return { success: false, error: "Failed to toggle public sharing" };
   }
 }

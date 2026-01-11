@@ -40,12 +40,25 @@ model AudioProject {
   exaggeration  Float    @default(0.5)
   cfgWeight     Float    @default(0.5)
   userId        String
-  // New fields for v2 - multi-provider support
-  provider      String   @default("chatterbox") // 'chatterbox' | 'twilio' | 'polly'
-  voiceId       String?  // Provider-specific voice ID
-  voiceConfig   Json?    // Store voice settings as JSON
+  // Provider field - defaults to chatterbox (only supported provider)
+  provider      String   @default("chatterbox")
+  voiceId       String?  // Legacy field - not used for Chatterbox
+  voiceConfig   Json?    // Legacy field - not used for Chatterbox
   exportCount   Int      @default(0)
   lastExportedAt DateTime?
+  // Filter dimensions
+  tags          String[] @default([])
+  type          String?  // "ivr", "greeting", "announcement", "promo"
+  function      String?  // "on-hold", "voicemail", "menu-prompt"
+  department    String?  // "sales", "support", "hr", "marketing"
+  status        String   @default("active") // "draft", "active", "archived"
+  duration      Float?   // seconds
+  // Public sharing / API access (for Phase 5)
+  isPublic      Boolean  @default(false)
+  publicSlug    String?  @unique
+  publicUrl     String?
+  accessCount   Int      @default(0)
+  lastAccessed  DateTime?
   user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt

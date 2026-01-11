@@ -22,7 +22,6 @@ import { getUserAudioProjects } from "~/actions/tts";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { Button } from "~/components/ui/button";
 import { useRouter } from "next/navigation";
-import { voices, getAllProviders } from "~/lib/voices";
 
 interface AudioProject {
   id: string;
@@ -256,7 +255,7 @@ export default function Dashboard() {
                   <div className="text-center">
                     <div className="font-semibold text-sm">Voice Library</div>
                     <div className="text-xs opacity-70">
-                      {voices.length}+ curated voices
+                      20+ curated voices
                     </div>
                   </div>
                 </Button>
@@ -289,27 +288,6 @@ export default function Dashboard() {
                     </div>
                   </div>
                 </Button>
-              </div>
-              <div className="mt-4 rounded-lg border bg-blue-50 p-3">
-                <div className="flex items-start gap-2">
-                  <div className="text-blue-600 text-sm font-semibold">
-                    Provider Support:
-                  </div>
-                  <div className="flex flex-wrap gap-2">
-                    {getAllProviders().map((provider) => (
-                      <span
-                        key={provider}
-                        className="rounded-full bg-blue-100 px-2 py-1 text-xs font-medium text-blue-700 capitalize"
-                      >
-                        {provider === "chatterbox" ? "AI" : provider}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-                <p className="mt-2 text-xs text-blue-700">
-                  Generate TTS with multiple providers. Credentials are passed
-                  through securely and never stored.
-                </p>
               </div>
             </CardContent>
           </Card>

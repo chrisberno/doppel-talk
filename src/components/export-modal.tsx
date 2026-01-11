@@ -4,15 +4,13 @@ import { useState } from "react";
 import { Copy, Download, Check, Loader2, X } from "lucide-react";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
-import { exportProject, exportWithVoice, type ExportFormat } from "~/actions/export";
+import { exportProject, type ExportFormat } from "~/actions/export";
 import { toast } from "sonner";
 
 interface ExportModalProps {
   isOpen: boolean;
   onClose: () => void;
   projectId?: string;
-  text?: string;
-  voiceId?: string;
   projectName?: string;
 }
 
@@ -20,8 +18,6 @@ export default function ExportModal({
   isOpen,
   onClose,
   projectId,
-  text,
-  voiceId,
   projectName,
 }: ExportModalProps) {
   const [selectedFormat, setSelectedFormat] = useState<ExportFormat>("twiml");
@@ -38,16 +34,12 @@ export default function ExportModal({
     try {
       let result;
       
-      if (projectId) {
-        // Export from existing project
-        result = await exportProject(projectId, selectedFormat);
-      } else if (text && voiceId) {
-        // Export with voice information
-        result = await exportWithVoice(text, voiceId, selectedFormat);
-      } else {
-        toast.error("Missing required information for export");
+      if (!projectId) {
+        toast.error("Missing project ID for export");
         return;
       }
+
+      result = await exportProject(projectId, selectedFormat);
 
       if (!result.success) {
         toast.error(result.error || "Failed to generate export");

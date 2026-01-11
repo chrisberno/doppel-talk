@@ -17,10 +17,12 @@ import type {
   Language,
   UploadedVoice,
 } from "~/types/tts";
-import { voices, type Voice, type VoiceProvider } from "~/lib/voices";
 import SpeechSettings from "~/components/create/speech-settings";
 import TextInput from "~/components/create/text-input";
 import AudioHistory from '~/components/create/audio-history';
+import { Card, CardContent } from "~/components/ui/card";
+import { Input } from "~/components/ui/input";
+import { Tag, FileText, Building2 } from "lucide-react";
 
 const LANGUAGES: Language[] = [
   { code: "en", name: "English", flag: "🇺🇸" },
@@ -70,16 +72,6 @@ export default function CreatePage() {
   const [selectedVoice, setSelectedVoice] = useState(
     VOICE_FILES[0]?.s3_key ?? "samples/voices/polly-matthew-neural.mp3",
   );
-  
-  // Multi-provider support
-  const [provider, setProvider] = useState<VoiceProvider>("chatterbox");
-  const [selectedVoiceId, setSelectedVoiceId] = useState<string>("");
-  // Credentials (never stored, pass-through only)
-  const [twilioSid, setTwilioSid] = useState("");
-  const [twilioAuth, setTwilioAuth] = useState("");
-  const [awsAccessKey, setAwsAccessKey] = useState("");
-  const [awsSecretKey, setAwsSecretKey] = useState("");
-  const [awsRegion, setAwsRegion] = useState("us-east-1");
 
   const [exaggeration, setExaggeration] = useState(0.5);
   const [cfgWeight, setCfgWeight] = useState(0.5);
@@ -88,6 +80,11 @@ export default function CreatePage() {
   const [userUploadedVoices, setUserUploadedVoices] = useState<UploadedVoice[]>(
     [],
   );
+  // Metadata fields
+  const [projectName, setProjectName] = useState("");
+  const [projectType, setProjectType] = useState("");
+  const [projectDepartment, setProjectDepartment] = useState("");
+  const [projectTags, setProjectTags] = useState("");
   const audioRef = useRef<HTMLAudioElement>(null);
 
   const fetchUserUploadedVoices = async () => {
@@ -138,35 +135,25 @@ export default function CreatePage() {
       return;
     }
     
-    // Validate provider-specific requirements
-    if (provider === "twilio" && (!twilioSid || !twilioAuth)) {
-      toast.error("Twilio credentials required");
-      return;
-    }
-    if (provider === "polly" && (!awsAccessKey || !awsSecretKey)) {
-      toast.error("AWS credentials required for Polly");
-      return;
-    }
-    if ((provider === "twilio" || provider === "polly") && !selectedVoiceId) {
-      toast.error("Please select a voice");
-      return;
-    }
-    
     setIsGenerating(true);
     try {
+      // Parse tags from comma-separated string
+      const tags = projectTags
+        .split(",")
+        .map((tag) => tag.trim())
+        .filter(Boolean);
+
       const result = await generateSpeechAction({
         text: text,
-        voice_S3_key: provider === "chatterbox" ? selectedVoice : undefined,
+        voice_S3_key: selectedVoice,
         language: selectedLanguage,
         exaggeration: exaggeration,
         cfg_weight: cfgWeight,
-        provider: provider,
-        voice_id: provider !== "chatterbox" ? selectedVoiceId : undefined,
-        twilio_sid: provider === "twilio" ? twilioSid : undefined,
-        twilio_auth: provider === "twilio" ? twilioAuth : undefined,
-        aws_access_key: provider === "polly" ? awsAccessKey : undefined,
-        aws_secret_key: provider === "polly" ? awsSecretKey : undefined,
-        aws_region: provider === "polly" ? awsRegion : undefined,
+        provider: "chatterbox",
+        name: projectName || undefined,
+        type: projectType || undefined,
+        department: projectDepartment || undefined,
+        tags: tags.length > 0 ? tags : undefined,
       });
 
       if (!result.success || !result.audioUrl || !result.s3_key) {
@@ -307,23 +294,87 @@ export default function CreatePage() {
                 text={text}
                 isGenerating={isGenerating}
                 onGenerate={generateSpeech}
-                provider={provider}
-                setProvider={setProvider}
-                selectedVoiceId={selectedVoiceId}
-                setSelectedVoiceId={setSelectedVoiceId}
-                twilioSid={twilioSid}
-                setTwilioSid={setTwilioSid}
-                twilioAuth={twilioAuth}
-                setTwilioAuth={setTwilioAuth}
-                awsAccessKey={awsAccessKey}
-                setAwsAccessKey={setAwsAccessKey}
-                awsSecretKey={awsSecretKey}
-                setAwsSecretKey={setAwsSecretKey}
-                awsRegion={awsRegion}
-                setAwsRegion={setAwsRegion}
               />
             </div>
             <div className="order-1 space-y-2 sm:space-y-3 lg:order-2 lg:col-span-2">
+              <Card className="shadow-lg">
+                <CardContent className="p-2 sm:p-3">
+                  <div className="mb-2 flex items-start justify-between">
+                    <div>
+                      <h3 className="mb-0.5 text-sm font-bold">Project Metadata</h3>
+                      <p className="text-muted-foreground text-xs">
+                        Optional: Organize your audio project
+                      </p>
+                    </div>
+                  </div>
+                  <div className="space-y-3">
+                    <div>
+                      <label className="mb-1 flex items-center gap-1 text-xs font-semibold">
+                        <FileText className="h-3 w-3" />
+                        Project Name
+                      </label>
+                      <Input
+                        type="text"
+                        placeholder="e.g., Welcome Message"
+                        value={projectName}
+                        onChange={(e) => setProjectName(e.target.value)}
+                        className="text-xs"
+                      />
+                    </div>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="mb-1 flex items-center gap-1 text-xs font-semibold">
+                          Type
+                        </label>
+                        <select
+                          value={projectType}
+                          onChange={(e) => setProjectType(e.target.value)}
+                          className="border-input bg-background w-full rounded-md border px-2 py-1.5 text-xs"
+                        >
+                          <option value="">Select type...</option>
+                          <option value="ivr">IVR</option>
+                          <option value="greeting">Greeting</option>
+                          <option value="announcement">Announcement</option>
+                          <option value="promo">Promo</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label className="mb-1 flex items-center gap-1 text-xs font-semibold">
+                          <Building2 className="h-3 w-3" />
+                          Department
+                        </label>
+                        <select
+                          value={projectDepartment}
+                          onChange={(e) => setProjectDepartment(e.target.value)}
+                          className="border-input bg-background w-full rounded-md border px-2 py-1.5 text-xs"
+                        >
+                          <option value="">Select department...</option>
+                          <option value="sales">Sales</option>
+                          <option value="support">Support</option>
+                          <option value="hr">HR</option>
+                          <option value="marketing">Marketing</option>
+                        </select>
+                      </div>
+                    </div>
+                    <div>
+                      <label className="mb-1 flex items-center gap-1 text-xs font-semibold">
+                        <Tag className="h-3 w-3" />
+                        Tags (comma-separated)
+                      </label>
+                      <Input
+                        type="text"
+                        placeholder="e.g., welcome, onboarding, customer-service"
+                        value={projectTags}
+                        onChange={(e) => setProjectTags(e.target.value)}
+                        className="text-xs"
+                      />
+                      <p className="mt-1 text-xs text-muted-foreground">
+                        Separate multiple tags with commas
+                      </p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
               <TextInput
                 text={text}
                 setText={setText}

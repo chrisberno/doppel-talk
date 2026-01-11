@@ -3,7 +3,6 @@
 import { headers } from "next/headers";
 import { auth } from "~/lib/auth";
 import { db } from "~/server/db";
-import { getVoiceById } from "~/lib/voices";
 import { escapeXml, escapeJavaScript, escapePython } from "~/lib/sanitize";
 
 export type ExportFormat = "twiml" | "studio-json" | "node-snippet" | "python-snippet";
@@ -209,7 +208,7 @@ export async function exportProject(
       return { success: false, error: "Unauthorized" };
     }
 
-    // Get voice information from project (now stored in v2 schema)
+    // Get voice information from project
     const voiceId = project.voiceId || undefined;
     const language = project.language;
     
@@ -222,9 +221,8 @@ export async function exportProject(
       },
     });
 
-    // For projects created with Twilio/Polly, we'd need to store voiceId
-    // For now, we'll generate exports without specific voice IDs for Chatterbox projects
-    // Users can manually edit the exported code to add their voice
+    // Note: Chatterbox projects don't use provider voice IDs
+    // Users can manually edit the exported code to add voice settings if needed
 
     let content: string;
 
@@ -258,55 +256,4 @@ export async function exportProject(
   }
 }
 
-/**
- * Export with voice information (for use with voice library)
- */
-export async function exportWithVoice(
-  text: string,
-  voiceId: string,
-  format: ExportFormat,
-): Promise<ExportResult> {
-  try {
-    // Get voice from library
-    const voice = getVoiceById(voiceId);
-    
-    if (!voice) {
-      return { success: false, error: "Voice not found" };
-    }
-
-    // Use provider voice ID for Twilio/Polly voices
-    const providerVoiceId = voice.providerVoiceId;
-    const language = voice.languageCode;
-
-    let content: string;
-
-    switch (format) {
-      case "twiml":
-        content = generateTwiML(text, providerVoiceId, language);
-        break;
-      case "studio-json":
-        content = generateStudioJSON(text, providerVoiceId, language);
-        break;
-      case "node-snippet":
-        content = generateNodeSnippet(text, providerVoiceId, language);
-        break;
-      case "python-snippet":
-        content = generatePythonSnippet(text, providerVoiceId, language);
-        break;
-      default:
-        return { success: false, error: "Invalid export format" };
-    }
-
-    return {
-      success: true,
-      content,
-    };
-  } catch (error) {
-    console.error("Export error:", error);
-    return {
-      success: false,
-      error: "Failed to generate export",
-    };
-  }
-}
 

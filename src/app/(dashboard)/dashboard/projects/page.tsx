@@ -11,13 +11,25 @@ import {
   Download,
   Plus,
   Code,
+  Share2,
+  Edit2,
+  X,
+  Check,
+  Filter,
+  Tag,
 } from "lucide-react";
 
 import { authClient } from "~/lib/auth-client";
 
 import { useEffect, useState } from "react";
 
-import { getUserAudioProjects, deleteAudioProject } from "~/actions/tts";
+import {
+  getUserAudioProjects,
+  deleteAudioProject,
+  updateAudioProject,
+  togglePublicSharing,
+} from "~/actions/tts";
+import { toast } from "sonner";
 import ExportModal from "~/components/export-modal";
 
 import { Card, CardContent } from "~/components/ui/card";
@@ -38,6 +50,14 @@ interface AudioProject {
   exaggeration: number;
   cfgWeight: number;
   userId: string;
+  tags: string[];
+  type: string | null;
+  department: string | null;
+  function: string | null;
+  status: string;
+  isPublic: boolean;
+  publicSlug: string | null;
+  publicUrl: string | null;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -52,6 +72,13 @@ export default function Projects() {
   const [sortBy, setSortBy] = useState<SortBy>("newest");
   const [exportModalOpen, setExportModalOpen] = useState(false);
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
+  // Filters
+  const [filterType, setFilterType] = useState<string>("all");
+  const [filterDepartment, setFilterDepartment] = useState<string>("all");
+  const [filterStatus, setFilterStatus] = useState<string>("all");
+  // Editable name state
+  const [editingNameId, setEditingNameId] = useState<string | null>(null);
+  const [editingNameValue, setEditingNameValue] = useState<string>("");
   const router = useRouter();
 
   useEffect(() => {
@@ -79,9 +106,38 @@ export default function Projects() {
   }, []);
 
   useEffect(() => {
-    let filtered = audioProjects.filter((project) =>
-      project.text.toLowerCase().includes(searchQuery.toLowerCase()),
-    );
+    let filtered = audioProjects.filter((project) => {
+      // Search filter
+      const matchesSearch =
+        project.text.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (project.name &&
+          project.name.toLowerCase().includes(searchQuery.toLowerCase())) ||
+        project.tags.some((tag) =>
+          tag.toLowerCase().includes(searchQuery.toLowerCase()),
+        );
+
+      // Type filter
+      const matchesType =
+        filterType === "all" ||
+        (filterType === "none" && !project.type) ||
+        project.type === filterType;
+
+      // Department filter
+      const matchesDepartment =
+        filterDepartment === "all" ||
+        (filterDepartment === "none" && !project.department) ||
+        project.department === filterDepartment;
+
+      // Status filter
+      const matchesStatus =
+        filterStatus === "all" || project.status === filterStatus;
+
+      return (
+        matchesSearch && matchesType && matchesDepartment && matchesStatus
+      );
+    });
+
+    // Sorting
     switch (sortBy) {
       case "newest":
         filtered = filtered.sort(
@@ -96,12 +152,16 @@ export default function Projects() {
         );
         break;
       case "name":
-        filtered = filtered.sort((a, b) => a.text.localeCompare(b.text));
+        filtered = filtered.sort((a, b) => {
+          const nameA = a.name || a.text;
+          const nameB = b.name || b.text;
+          return nameA.localeCompare(nameB);
+        });
         break;
     }
 
     setFilteredProjects(filtered);
-  }, [audioProjects, searchQuery, sortBy]);
+  }, [audioProjects, searchQuery, sortBy, filterType, filterDepartment, filterStatus]);
 
   const handleDelete = async (projectId: string, e: React.MouseEvent) => {
     e.stopPropagation();
@@ -121,6 +181,69 @@ export default function Projects() {
     e.stopPropagation();
     window.open(audioUrl, "_blank");
   };
+
+  const handleUpdateName = async (projectId: string, newName: string) => {
+    const result = await updateAudioProject(projectId, {
+      name: newName.trim() || undefined,
+    });
+    if (result.success) {
+      setAudioProjects((prev) =>
+        prev.map((p) =>
+          p.id === projectId ? { ...p, name: newName.trim() || null } : p,
+        ),
+      );
+      setEditingNameId(null);
+      toast.success("Name updated");
+    } else {
+      toast.error(result.error || "Failed to update name");
+    }
+  };
+
+  const handleToggleSharing = async (projectId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    const project = audioProjects.find((p) => p.id === projectId);
+    if (!project) return;
+
+    const result = await togglePublicSharing(projectId);
+    if (result.success) {
+      setAudioProjects((prev) =>
+        prev.map((p) =>
+          p.id === projectId
+            ? {
+                ...p,
+                isPublic: !p.isPublic,
+                publicSlug: result.publicSlug || null,
+                publicUrl: result.publicUrl || null,
+              }
+            : p,
+        ),
+      );
+      if (result.publicUrl) {
+        toast.success("Project shared! URL copied to clipboard.");
+        void navigator.clipboard.writeText(result.publicUrl);
+      } else {
+        toast.success("Sharing disabled");
+      }
+    } else {
+      toast.error(result.error || "Failed to toggle sharing");
+    }
+  };
+
+  // Get unique filter values
+  const uniqueTypes = Array.from(
+    new Set(
+      audioProjects
+        .map((p) => p.type)
+        .filter((t): t is string => typeof t === "string" && t.length > 0),
+    ),
+  ).sort();
+  const uniqueDepartments = Array.from(
+    new Set(
+      audioProjects
+        .map((p) => p.department)
+        .filter((d): d is string => typeof d === "string" && d.length > 0),
+    ),
+  ).sort();
 
   if (isLoading) {
     return (
@@ -161,25 +284,84 @@ export default function Projects() {
           </div>
           <Card>
             <CardContent className="p-4">
-              <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                <div className="relative max-w-md flex-1">
-                  <Search className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
-                  <Input
-                    placeholder="Search audio projects..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="pl-9"
-                  />
+              <div className="space-y-4">
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                  <div className="relative max-w-md flex-1">
+                    <Search className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
+                    <Input
+                      placeholder="Search audio projects..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className="pl-9"
+                    />
+                  </div>
+                  <select
+                    value={sortBy}
+                    onChange={(e) => setSortBy(e.target.value as SortBy)}
+                    className="border-input bg-background rounded-md border px-3 py-2 text-sm"
+                  >
+                    <option value="newest">Newest First</option>
+                    <option value="oldest">Oldest First</option>
+                    <option value="name">Name A-Z</option>
+                  </select>
                 </div>
-                <select
-                  value={sortBy}
-                  onChange={(e) => setSortBy(e.target.value as SortBy)}
-                  className="border-input bg-background rounded-md border px-3 py-2 text-sm"
-                >
-                  <option value="newest">Newest First</option>
-                  <option value="oldest">Oldest First</option>
-                  <option value="name">Text A-Z</option>
-                </select>
+                <div className="flex flex-wrap gap-3">
+                  <div className="flex items-center gap-2">
+                    <Filter className="h-4 w-4 text-muted-foreground" />
+                    <select
+                      value={filterType}
+                      onChange={(e) => setFilterType(e.target.value)}
+                      className="border-input bg-background rounded-md border px-2 py-1.5 text-xs"
+                    >
+                      <option value="all">All Types</option>
+                      <option value="none">No Type</option>
+                      {uniqueTypes.map((type) => (
+                        <option key={type} value={type}>
+                          {type}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <select
+                    value={filterDepartment}
+                    onChange={(e) => setFilterDepartment(e.target.value)}
+                    className="border-input bg-background rounded-md border px-2 py-1.5 text-xs"
+                  >
+                    <option value="all">All Departments</option>
+                    <option value="none">No Department</option>
+                    {uniqueDepartments.map((dept) => (
+                      <option key={dept} value={dept}>
+                        {dept}
+                      </option>
+                    ))}
+                  </select>
+                  <select
+                    value={filterStatus}
+                    onChange={(e) => setFilterStatus(e.target.value)}
+                    className="border-input bg-background rounded-md border px-2 py-1.5 text-xs"
+                  >
+                    <option value="all">All Status</option>
+                    <option value="draft">Draft</option>
+                    <option value="active">Active</option>
+                    <option value="archived">Archived</option>
+                  </select>
+                  {(filterType !== "all" ||
+                    filterDepartment !== "all" ||
+                    filterStatus !== "all") && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => {
+                        setFilterType("all");
+                        setFilterDepartment("all");
+                        setFilterStatus("all");
+                      }}
+                      className="h-7 text-xs"
+                    >
+                      Clear Filters
+                    </Button>
+                  )}
+                </div>
               </div>
             </CardContent>
           </Card>
@@ -237,9 +419,125 @@ export default function Projects() {
                         <Music className="text-muted-foreground h-8 w-8" />
                       </div>
                       <div className="min-w-0 flex-1">
+                        <div className="mb-2 flex items-center gap-2">
+                          {editingNameId === project.id ? (
+                            <div className="flex items-center gap-1">
+                              <Input
+                                value={editingNameValue}
+                                onChange={(e) => setEditingNameValue(e.target.value)}
+                                onKeyDown={(e) => {
+                                  if (e.key === "Enter") {
+                                    handleUpdateName(project.id, editingNameValue);
+                                  }
+                                  if (e.key === "Escape") {
+                                    setEditingNameId(null);
+                                  }
+                                }}
+                                className="h-7 text-sm"
+                                autoFocus
+                              />
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="h-7 w-7 p-0"
+                                onClick={() =>
+                                  handleUpdateName(project.id, editingNameValue)
+                                }
+                              >
+                                <Check className="h-3 w-3" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="h-7 w-7 p-0"
+                                onClick={() => setEditingNameId(null)}
+                              >
+                                <X className="h-3 w-3" />
+                              </Button>
+                            </div>
+                          ) : (
+                            <div className="flex items-center gap-2">
+                              <h3 className="font-semibold text-sm">
+                                {project.name || "Untitled"}
+                              </h3>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                                onClick={() => {
+                                  setEditingNameId(project.id);
+                                  setEditingNameValue(project.name || "");
+                                }}
+                                title="Edit name"
+                              >
+                                <Edit2 className="h-3 w-3" />
+                              </Button>
+                            </div>
+                          )}
+                          {project.isPublic && (
+                            <div className="flex items-center gap-1 rounded-full bg-green-100 px-2 py-0.5 text-xs text-green-700">
+                              <Share2 className="h-3 w-3" />
+                              Public
+                            </div>
+                          )}
+                          {project.type && (
+                            <span className="rounded-full bg-blue-100 px-2 py-0.5 text-xs text-blue-700 capitalize">
+                              {project.type}
+                            </span>
+                          )}
+                          {project.department && (
+                            <span className="rounded-full bg-purple-100 px-2 py-0.5 text-xs text-purple-700 capitalize">
+                              {project.department}
+                            </span>
+                          )}
+                          {project.status !== "active" && (
+                            <span className="rounded-full bg-gray-100 px-2 py-0.5 text-xs text-gray-700 capitalize">
+                              {project.status}
+                            </span>
+                          )}
+                        </div>
                         <p className="text-muted-foreground mb-2 line-clamp-2 text-sm">
                           {project.text}
                         </p>
+                        {project.tags && project.tags.length > 0 && (
+                          <div className="mb-2 flex flex-wrap items-center gap-1">
+                            {project.tags.map((tag, idx) => (
+                              <span
+                                key={idx}
+                                className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2 py-0.5 text-xs text-slate-700"
+                              >
+                                <Tag className="h-3 w-3" />
+                                {tag}
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                        {project.isPublic && project.publicUrl && (
+                          <div className="mb-2 rounded-md bg-green-50 p-2 text-xs">
+                            <div className="mb-1 font-semibold text-green-900">
+                              Public URL:
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <code className="flex-1 break-all rounded bg-white px-2 py-1 text-green-800">
+                                {project.publicUrl}
+                              </code>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="h-6 text-xs"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  void navigator.clipboard.writeText(
+                                    project.publicUrl!,
+                                  );
+                                  toast.success("URL copied to clipboard");
+                                }}
+                              >
+                                Copy
+                              </Button>
+                            </div>
+                          </div>
+                        )}
                         <div className="text-muted-foreground flex items-center gap-4 text-xs">
                           <div className="flex items-center gap-1">
                             <Calendar className="h-3 w-3" />
@@ -260,6 +558,17 @@ export default function Projects() {
                         >
                           <source src={project.audioUrl} type="audio/wav" />
                         </audio>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className={`h-8 w-8 p-0 ${
+                            project.isPublic ? "text-green-600" : ""
+                          }`}
+                          onClick={(e) => handleToggleSharing(project.id, e)}
+                          title={project.isPublic ? "Make private" : "Make public"}
+                        >
+                          <Share2 className="h-4 w-4" />
+                        </Button>
                         <Button
                           variant="ghost"
                           size="sm"
