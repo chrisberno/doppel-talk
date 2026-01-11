@@ -1,0 +1,36 @@
+// Doppel Voice Platform - V1 Original Architecture (Before Jan 11, 2026)
+// This was the "messy" state with 3 separate voice backends
+// Paste this into Eraser.io diagram view
+
+// Title
+title [shape: text, label: "V1: Original Architecture (Pre-Consolidation)", color: gray]
+
+// Product Layer
+products-group [shape: rectangle, label: "PRODUCT LAYER", color: lightblue] {
+  drift-clinic [shape: rectangle, label: "drift.clinic\n(Sleep Affirmations)", color: cyan]
+  doppel-talk [shape: rectangle, label: "doppel.talk\n(Voice Studio)", color: cyan]
+  doppel-center [shape: rectangle, label: "doppel.center\n(Voice Demos)", color: cyan]
+}
+
+// Separate Backends (the problem)
+backends-group [shape: rectangle, label: "BACKEND LAYER (Fragmented)", color: lightyellow] {
+  replicate [shape: cloud, label: "Replicate API\n(VoiceCraft)\n$0.15/clone", color: orange]
+  modal [shape: cloud, label: "Modal\n(Chatterbox)\nSelf-hosted", color: green]
+  render [shape: cloud, label: "Render\n(Express.js)\nPolly wrapper", color: orange]
+}
+
+// External Services
+polly [shape: cloud, label: "AWS Polly\n(Pre-trained voices)", color: purple]
+s3 [shape: cylinder, label: "AWS S3\n(Audio Storage)", color: purple]
+
+// Connections
+drift-clinic -> replicate: "VoiceCraft cloning"
+doppel-talk -> modal: "Chatterbox cloning"
+doppel-talk -> polly: "Fallback provider"
+doppel-center -> render: "API calls"
+render -> polly: "TTS generation"
+modal -> s3: "Audio storage"
+replicate -> s3: "Audio storage"
+
+// Problems callout
+problems [shape: note, label: "PROBLEMS:\n• 3 different voice backends\n• Paying Replicate AND Modal\n• doppel.center redundant\n• No shared infrastructure\n• Inconsistent capabilities", color: red]

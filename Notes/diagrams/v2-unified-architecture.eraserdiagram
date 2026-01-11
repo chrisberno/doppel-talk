@@ -1,0 +1,44 @@
+// Doppel Voice Platform - V2 Unified Architecture (Jan 11, 2026)
+// Single Chatterbox backend powering all products
+// Paste this into Eraser.io diagram view
+
+// Title
+title [shape: text, label: "V2: Unified Architecture (Chatterbox-Powered)", color: gray]
+
+// Product Layer
+products-group [shape: rectangle, label: "PRODUCT LAYER", color: lightblue] {
+  drift-clinic [shape: rectangle, label: "drift.clinic\n(Sleep Affirmations)\nVercel", color: cyan]
+  doppel-talk [shape: rectangle, label: "doppel.talk\n(Voice Studio)\nVercel", color: cyan]
+  future-products [shape: rectangle, label: "[Future Products]\nIVR, Podcasts, etc.", color: lightgray]
+}
+
+// Unified Voice API
+voice-api [shape: rectangle, label: "DOPPEL VOICE API\n(Modal - Serverless GPU)", color: green] {
+  chatterbox [shape: hexagon, label: "Chatterbox\n(Voice Cloning Engine)\nMIT License", color: lightgreen]
+  house-voices [shape: cylinder, label: "House Voice Library\n(Curated Samples)", color: lightyellow]
+  user-uploads [shape: cylinder, label: "User Uploads\n(Custom Clones)", color: lightyellow]
+  controls [shape: rectangle, label: "Controls:\n• Emotion/Intensity\n• Pacing\n• 23 Languages\n• Paralinguistics", color: white]
+}
+
+// Storage
+s3 [shape: cylinder, label: "AWS S3\n• Voice samples\n• Generated audio", color: purple]
+
+// Database
+neon [shape: database, label: "Neon PostgreSQL\n• User accounts\n• Projects\n• Credits", color: purple]
+
+// Connections - Products to API
+drift-clinic -> voice-api: "Clone user voice"
+doppel-talk -> voice-api: "House voices + custom clones"
+future-products -> voice-api: "Same API"
+
+// Internal API connections
+house-voices -> chatterbox: "Source samples"
+user-uploads -> chatterbox: "Source samples"
+chatterbox -> s3: "Output audio"
+voice-api -> neon: "Usage tracking"
+
+// Benefits callout
+benefits [shape: note, label: "BENEFITS:\n• Single voice backend\n• ALL voices have emotion/pacing\n• Self-hosted (cost control)\n• Easy to add products\n• Clean licensing path", color: green]
+
+// Retired callout
+retired [shape: note, label: "RETIRED:\n✗ VoiceCraft/Replicate\n✗ doppel.center API\n✗ Polly/Twilio runtime", color: gray]

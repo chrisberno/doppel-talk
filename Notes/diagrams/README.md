@@ -19,7 +19,9 @@ This directory contains architecture diagrams for Doppel Talk. Visual diagrams h
 
 | File | Description |
 |------|-------------|
-| `architecture-diagram.eraserdiagram` | Full project architecture including file structure, routes, database schema, and external services |
+| `v1-original-architecture.eraserdiagram` | **Strategic V1:** Fragmented architecture before consolidation (3 backends) |
+| `v2-unified-architecture.eraserdiagram` | **Strategic V2:** Unified Chatterbox-powered architecture (current target) |
+| `architecture-diagram.eraserdiagram` | **Technical:** Project file structure, routes, database schema, external services |
 
 ---
 

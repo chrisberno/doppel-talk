@@ -49,7 +49,15 @@ const LANGUAGES: Language[] = [
 ];
 
 const VOICE_FILES: VoiceFile[] = [
-  { name: "Michael", s3_key: "samples/voices/Michael.wav" },
+  { name: "Matthew", s3_key: "samples/voices/polly-matthew-neural.mp3" },
+  { name: "Joanna", s3_key: "samples/voices/polly-joanna-neural.mp3" },
+  { name: "Ruth", s3_key: "samples/voices/polly-ruth-generative.mp3" },
+  { name: "Stephen", s3_key: "samples/voices/polly-stephen-generative.mp3" },
+  { name: "Amy", s3_key: "samples/voices/polly-amy-neural.mp3" },
+  { name: "Brian", s3_key: "samples/voices/polly-brian-neural.mp3" },
+  { name: "Emma", s3_key: "samples/voices/polly-emma-neural.mp3" },
+  { name: "Ivy", s3_key: "samples/voices/polly-ivy-neural.mp3" },
+  { name: "Joey", s3_key: "samples/voices/polly-joey-neural.mp3" },
 ];
 
 export default function CreatePage() {
@@ -60,7 +68,7 @@ export default function CreatePage() {
   const [text, setText] = useState("");
   const [selectedLanguage, setSelectedLanguage] = useState("en");
   const [selectedVoice, setSelectedVoice] = useState(
-    VOICE_FILES[0]?.s3_key ?? "samples/voices/Michael.wav",
+    VOICE_FILES[0]?.s3_key ?? "samples/voices/polly-matthew-neural.mp3",
   );
   
   // Multi-provider support
