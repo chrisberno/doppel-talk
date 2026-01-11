@@ -24,6 +24,7 @@ model User {
   credits       Int       @default(10)
   audioProjects AudioProject[]
   uploadedVoices UploadedVoice[]
+  apiKeys       ApiKey[]
   // API metering fields
   monthlyPlays        Int       @default(0)
   monthlyPlaysReset   DateTime?
@@ -129,4 +130,18 @@ model Verification {
   updatedAt  DateTime @default(now()) @updatedAt
 
   @@map("verification")
+}
+
+model ApiKey {
+  id          String   @id @default(cuid())
+  name        String   // "Production", "Development", etc.
+  key         String   @unique // The actual key (hashed)
+  keyPreview  String   // Last 4 chars for display: "...abc123"
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  lastUsedAt  DateTime?
+  expiresAt   DateTime?
+  createdAt   DateTime @default(now())
+
+  @@map("api_key")
 }
