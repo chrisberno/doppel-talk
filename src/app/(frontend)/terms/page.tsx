@@ -4,7 +4,7 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 
 export default function TermsPage() {
-  const markdownPath = join(process.cwd(), "assets", "legal", "terms-of-service.md");
+  const markdownPath = join(process.cwd(), "bizops", "assets", "legal", "terms-of-service.md");
   const content = readFileSync(markdownPath, "utf-8");
 
   return (

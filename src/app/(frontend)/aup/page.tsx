@@ -6,6 +6,7 @@ import remarkGfm from "remark-gfm";
 export default function AUPPage() {
   const markdownPath = join(
     process.cwd(),
+    "bizops",
     "assets",
     "legal",
     "acceptable-use-policy.md",

@@ -9,6 +9,7 @@ import { Card, CardContent } from "~/components/ui/card";
 export default function ContactPage() {
   const markdownPath = join(
     process.cwd(),
+    "bizops",
     "assets",
     "legal",
     "contact-page-content.md",
