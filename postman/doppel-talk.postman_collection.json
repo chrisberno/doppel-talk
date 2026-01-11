@@ -1,0 +1,349 @@
+{
+  "info": {
+    "_postman_id": "doppel-talk-api-v1",
+    "name": "Doppel Talk API",
+    "description": "Voice Content Management System API - Create, manage, and serve AI-generated voice content.\n\n## Overview\n\nDoppel Talk is a Voice CMS that provides:\n- Text-to-speech voice generation via Chatterbox\n- Voice cloning from user-provided samples\n- Public API endpoints for Twilio/IVR integration\n- Usage metering and access control\n\n## Authentication\n\n- **Public endpoints** (`/api/v/{slug}`): No auth required\n- **Dashboard endpoints**: Session-based auth (cookie)\n- **API endpoints** (future): API key in header\n\n## Base URLs\n\n- Production: `https://doppel.talk`\n- Local: `http://localhost:3000`",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Public Voice API",
+      "description": "Public endpoints for serving voice content to external systems (Twilio, IVR, etc.)",
+      "item": [
+        {
+          "name": "Get Voice by Slug",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v/{{slug}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v", "{{slug}}"]
+            },
+            "description": "Fetch audio content by public slug. Returns a 302 redirect to the S3 audio URL.\n\n**Response Codes:**\n- `302`: Success - redirects to audio file\n- `402`: Monthly play limit exceeded\n- `404`: Slug not found or not public\n- `429`: Rate limit exceeded\n\n**Twilio Usage:**\n```xml\n<Response>\n  <Play>https://doppel.talk/api/v/my-greeting</Play>\n</Response>\n```"
+          },
+          "response": [
+            {
+              "name": "Success - Redirect to Audio",
+              "originalRequest": {
+                "method": "GET",
+                "url": {
+                  "raw": "{{base_url}}/api/v/test-greeting",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "v", "test-greeting"]
+                }
+              },
+              "status": "Found",
+              "code": 302,
+              "header": [
+                {
+                  "key": "Location",
+                  "value": "https://doppel-talk.s3.amazonaws.com/generated/abc123.wav"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "audio/wav"
+                },
+                {
+                  "key": "X-Audio-Slug",
+                  "value": "test-greeting"
+                }
+              ],
+              "body": ""
+            },
+            {
+              "name": "Not Found",
+              "originalRequest": {
+                "method": "GET",
+                "url": {
+                  "raw": "{{base_url}}/api/v/nonexistent",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "v", "nonexistent"]
+                }
+              },
+              "status": "Not Found",
+              "code": 404,
+              "body": "{\"error\": \"Voice content not found\"}"
+            },
+            {
+              "name": "Limit Exceeded",
+              "originalRequest": {
+                "method": "GET",
+                "url": {
+                  "raw": "{{base_url}}/api/v/test-greeting",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "v", "test-greeting"]
+                }
+              },
+              "status": "Payment Required",
+              "code": 402,
+              "body": "{\"error\": \"Monthly play limit exceeded\", \"limit\": 100, \"used\": 100}"
+            }
+          ]
+        },
+        {
+          "name": "Health Check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/health",
+              "host": ["{{base_url}}"],
+              "path": ["api", "health"]
+            },
+            "description": "Basic health check endpoint."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Dashboard API (Auth Required)",
+      "description": "Endpoints that require user authentication. These are used by the dashboard UI.",
+      "item": [
+        {
+          "name": "Generate Speech",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"text\": \"Hello, this is a test of the Doppel Talk voice generation system.\",\n  \"voice_S3_key\": \"samples/voices/polly-matthew-neural.mp3\",\n  \"language\": \"en-US\",\n  \"exaggeration\": 0.5,\n  \"cfg_weight\": 0.5,\n  \"name\": \"Test Greeting\",\n  \"type\": \"greeting\",\n  \"department\": \"sales\",\n  \"tags\": [\"test\", \"demo\"]\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/generate",
+              "host": ["{{base_url}}"],
+              "path": ["api", "generate"]
+            },
+            "description": "Generate voice audio from text using Chatterbox.\n\n**Parameters:**\n- `text` (required): The text to convert to speech\n- `voice_S3_key` (required): S3 key of the voice sample to clone\n- `language`: Language code (default: en-US)\n- `exaggeration`: Emotion intensity 0-1 (default: 0.5)\n- `cfg_weight`: Style weight 0-1 (default: 0.5)\n- `name`: Optional name for the project\n- `type`: Category (ivr, greeting, announcement, promo)\n- `department`: Department (sales, support, hr, marketing)\n- `tags`: Array of tags"
+          },
+          "response": []
+        },
+        {
+          "name": "List Projects",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/projects",
+              "host": ["{{base_url}}"],
+              "path": ["api", "projects"]
+            },
+            "description": "List all audio projects for the authenticated user."
+          },
+          "response": []
+        },
+        {
+          "name": "Toggle Public Sharing",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"projectId\": \"{{project_id}}\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/projects/share",
+              "host": ["{{base_url}}"],
+              "path": ["api", "projects", "share"]
+            },
+            "description": "Toggle public sharing for a project. When enabled, generates a public slug that can be used with `/api/v/{slug}`."
+          },
+          "response": []
+        },
+        {
+          "name": "Update Project",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Updated Name\",\n  \"type\": \"ivr\",\n  \"department\": \"support\",\n  \"tags\": [\"updated\", \"v2\"]\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/projects/{{project_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "projects", "{{project_id}}"]
+            },
+            "description": "Update project metadata (name, type, department, tags)."
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Project",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/projects/{{project_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "projects", "{{project_id}}"]
+            },
+            "description": "Delete an audio project."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Usage Stats",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/usage",
+              "host": ["{{base_url}}"],
+              "path": ["api", "usage"]
+            },
+            "description": "Get current usage statistics for the authenticated user.\n\n**Response:**\n- `monthlyPlays`: Current month's play count\n- `monthlyPlaysLimit`: Monthly limit\n- `publicAssets`: Number of public slugs\n- `publicAssetsLimit`: Max public slugs allowed"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Export",
+      "description": "Export voice projects in various formats for integration.",
+      "item": [
+        {
+          "name": "Export as TwiML",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"projectId\": \"{{project_id}}\",\n  \"format\": \"twiml\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/export",
+              "host": ["{{base_url}}"],
+              "path": ["api", "export"]
+            },
+            "description": "Export project as TwiML XML for Twilio webhooks."
+          },
+          "response": []
+        },
+        {
+          "name": "Export as Studio JSON",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"projectId\": \"{{project_id}}\",\n  \"format\": \"studio-json\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/export",
+              "host": ["{{base_url}}"],
+              "path": ["api", "export"]
+            },
+            "description": "Export project as Twilio Studio Flow JSON."
+          },
+          "response": []
+        },
+        {
+          "name": "Export as Node.js Snippet",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"projectId\": \"{{project_id}}\",\n  \"format\": \"node-snippet\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/export",
+              "host": ["{{base_url}}"],
+              "path": ["api", "export"]
+            },
+            "description": "Export project as Node.js code snippet."
+          },
+          "response": []
+        },
+        {
+          "name": "Export as Python Snippet",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"projectId\": \"{{project_id}}\",\n  \"format\": \"python-snippet\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/export",
+              "host": ["{{base_url}}"],
+              "path": ["api", "export"]
+            },
+            "description": "Export project as Python code snippet."
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [""]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [""]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:3000",
+      "type": "string"
+    },
+    {
+      "key": "slug",
+      "value": "test-greeting",
+      "type": "string"
+    },
+    {
+      "key": "project_id",
+      "value": "",
+      "type": "string"
+    }
+  ]
+}

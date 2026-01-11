@@ -24,6 +24,11 @@ model User {
   credits       Int       @default(10)
   audioProjects AudioProject[]
   uploadedVoices UploadedVoice[]
+  // API metering fields
+  monthlyPlays        Int       @default(0)
+  monthlyPlaysReset   DateTime?
+  publicAssetsLimit   Int       @default(3)   // Free tier: 3 public slugs
+  monthlyPlaysLimit   Int       @default(100) // Free tier: 100 plays/mo
 
   @@unique([email])
   @@map("user")
@@ -54,11 +59,13 @@ model AudioProject {
   status        String   @default("active") // "draft", "active", "archived"
   duration      Float?   // seconds
   // Public sharing / API access (for Phase 5)
-  isPublic      Boolean  @default(false)
-  publicSlug    String?  @unique
-  publicUrl     String?
-  accessCount   Int      @default(0)
-  lastAccessed  DateTime?
+  isPublic           Boolean  @default(false)
+  publicSlug         String?  @unique
+  publicUrl          String?
+  accessCount        Int      @default(0)
+  lastAccessed       DateTime?
+  monthlyAccessCount Int      @default(0)
+  lastAccessReset    DateTime?
   user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
