@@ -5,9 +5,14 @@ import { Geist } from "next/font/google";
 import { Toaster } from '~/components/ui/sonner';
 
 export const metadata: Metadata = {
-  title: "Doppel Talk",
+  title: "double.talk",
   description: "Enterprise A.I. Voice Solutions",
-  icons: [{ rel: "icon", url: "/favicon.ico" }],
+  icons: [
+    { rel: "icon", url: "/favicon.svg", type: "image/svg+xml" },
+    { rel: "icon", url: "/favicon-32.png", sizes: "32x32", type: "image/png" },
+    { rel: "icon", url: "/favicon-16.png", sizes: "16x16", type: "image/png" },
+    { rel: "apple-touch-icon", url: "/apple-touch-icon.png" },
+  ],
 };
 
 const geist = Geist({

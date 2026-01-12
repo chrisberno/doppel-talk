@@ -1,0 +1,132 @@
+# double.talk — Prototype Logo Use Guide
+
+> **Purpose**: Enable fast, confident use of the double.talk logo during prototyping, testing, and early internal alignment — with a shared understanding of *why* the mark works and how to apply it for both human and agent-focused experiences.
+
+---
+
+## 1. Brand Intent (One‑Sentence)
+**double.talk enables a single human voice to be transformed, replicated, and broadcast clearly and accessibly across agentic systems and IVR environments.**
+
+---
+
+## 2. The Core Mark
+
+### Visual Summary
+- Symmetrical, butterfly‑like form
+- Mirrored profiles suggesting dialogue and self‑reflection
+- Subtle outward signal elements on one side
+
+This mark intentionally balances **human warmth** with **system intelligence**.
+
+---
+
+## 3. Why This Mark Is Strong (Foundational Rationale)
+
+### 🦋 Butterfly Symmetry — Agentic Cloning
+- Instantly communicates **duplication without loss of identity**
+- Mirrored faces imply:
+  - conversation
+  - delegation
+  - self‑dialogue between agents
+- The form feels *alive* — avoiding cold, corporate AI aesthetics
+
+### 📡 Outer‑Band Signal Motifs — Broadcast & Reach
+- Dots / lines imply controlled signal expansion
+- Reads as:
+  - voice amplification
+  - IVR distribution
+  - accessibility through clarity
+- Subtle enough to disappear cleanly at small sizes
+
+### 🎨 Blue → Purple Gradient — Trust + Intelligence
+- Blue anchors accessibility, calm, reliability
+- Purple introduces creativity, autonomy, intelligence
+- Sits comfortably between healthcare, telecom, and AI tooling
+
+**Net effect:** the logo encodes your *architecture* as visual metaphor.
+
+---
+
+## 4. Dual Usage Tracks
+
+### Track A — Human‑First (Accessibility & IVR)
+**Goal:** Reassurance, clarity, approachability
+
+Recommended usage:
+- Light background version
+- Reduced or softened broadcast elements
+- Larger clear‑space
+
+Use in:
+- IVR admin tools
+- Accessibility documentation
+- Healthcare / support‑facing materials
+
+---
+
+### Track B — Agent‑First (Developer & System Identity)
+**Goal:** Autonomy, replication, scale
+
+Recommended usage:
+- Dark background version
+- Visible broadcast lines or dots
+- Tighter, more compact placement
+
+Use in:
+- Developer docs
+- CLI tools
+- Architecture diagrams
+- AI‑forward demos
+
+---
+
+## 5. Light vs Dark Modes
+
+### Light Mode
+- Preferred for human‑facing experiences
+- Emphasizes trust and legibility
+
+### Dark Mode
+- Preferred for agentic / technical contexts
+- Enhances perceived depth and system intelligence
+
+Both versions are first‑class citizens — neither is secondary.
+
+---
+
+## 6. Scaling & Simplification Rules
+
+- **Large sizes**: full mark with broadcast elements
+- **Medium sizes**: butterfly core only
+- **Small sizes (favicon / IVR UI)**:
+  - remove broadcast detail
+  - keep high‑contrast silhouette
+
+Never distort or skew the symmetry.
+
+---
+
+## 7. Motion (Optional, Future)
+If animated:
+- Only animate the *outward* signal side
+- Slow, subtle ripple or pulse
+- No rotation, no bounce
+
+Motion should feel *assistive*, not attention‑seeking.
+
+---
+
+## 8. Legal & Practical Note
+This guide and logo are **prototype‑safe**.
+
+Before public launch or trademark filing:
+- Re‑draw final SVG paths
+- Lock spacing, color values, and contrast ratios
+
+---
+
+## 9. Internal North Star
+> *“One voice, clearly amplified — without losing its humanity.”*
+
+If a usage decision supports that sentence, it’s on‑brand.
+

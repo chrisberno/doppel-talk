@@ -1,0 +1,21 @@
+
+<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="gradBluePurpleDark" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#2EC5FF"/>
+      <stop offset="100%" stop-color="#9B5CFF"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" fill="#0B0B0F"/>
+  <!-- Butterfly / replication core -->
+  <path d="M256 120 C200 120 160 200 200 256 C160 312 200 392 256 392"
+        fill="url(#gradBluePurpleDark)"/>
+  <path d="M256 120 C312 120 352 200 312 256 C352 312 312 392 256 392"
+        fill="url(#gradBluePurpleDark)"/>
+  <!-- Broadcast lines -->
+  <g stroke="#9B5CFF" stroke-width="4" fill="none" opacity="0.9">
+    <path d="M340 170 C380 210 380 302 340 342"/>
+    <path d="M360 160 C410 215 410 297 360 352"/>
+    <path d="M380 150 C440 220 440 292 380 362"/>
+  </g>
+</svg>
