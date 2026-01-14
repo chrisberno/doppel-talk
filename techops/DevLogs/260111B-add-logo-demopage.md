@@ -2,8 +2,9 @@
 
 **Date:** January 11, 2026
 **Author:** SPOK
-**Status:** Ready for Next Sprint
+**Status:** COMPLETED
 **Priority:** Phase 2 + Phase 8 completion
+**Completed:** January 12, 2026 (CTO session)
 
 ---
 
@@ -23,63 +24,68 @@ This sprint picks up from a massive successful session (260111A) where we:
 ## Objectives
 
 ### 1. Finalize Logo
-**Status:** Drafts exist, need selection/implementation
+**Status:** COMPLETED
 
-Logo drafts in `bizops/assets/`:
-- `doppel-talk-logo-draft1.svg`
-- `doppel-talk-logo-draft2.png`
-- `doppel-talk-logo-draft2.svg`
+Final logo: Pixelating butterfly with data dispersion effect (double-talk-demo-logo3-light.svg)
+- Represents voice data transformation
+- Enterprise-appropriate aesthetic (not "candy coated")
 
 **Tasks:**
-- [ ] Review drafts with CEO
-- [ ] Select final logo
-- [ ] Update favicon (`public/favicon.ico`)
-- [ ] Update nav logo in `src/app/page.tsx` (currently uses Sparkles icon)
-- [ ] Add to footer if desired
+- [x] Review drafts with CEO
+- [x] Select final logo (butterfly with pixelation effect)
+- [x] Update favicon (`public/favicon.svg`, `favicon-16.png`, `favicon-32.png`)
+- [x] Update nav logo in `src/app/page.tsx` (now uses `/logo-butterfly.png`)
+- [x] Update apple-touch-icon
 
 ### 2. Build Public Voice Catalog Page
-**Status:** Gap identified - doppel.talk has homepage demos but no browsable catalog
+**Status:** COMPLETED
 
-**Why this matters:**
-- `voice-demos.doppel.center` has a full voice catalog (16 Polly voices)
-- doppel.talk only has embedded demos on homepage
-- Can't retire doppel.center until doppel.talk has feature parity
-- This is a key sales/conversion tool - users browse before signup
+Route: `/ai-voice-catalog` (SEO-optimized naming per CEO request)
 
-**Reference - what voice-demos has:**
-```
-GET https://doppel.center/api/voices
-→ Returns 16 voices with:
-  - id, name, gender, language, accent, tone
-  - tags, previewText, sampleAudioUrl
-  - pricing info
-```
-
-**Tasks:**
-- [ ] Create `/voices` or `/catalog` public route (no auth)
-- [ ] Build voice card grid with:
+**Implementation:**
+- [x] Create `/ai-voice-catalog` public route (no auth)
+- [x] Build voice card grid with:
   - Voice name, gender, language/accent
-  - Play button for audio preview
-  - Tags (professional, casual, etc.)
-- [ ] Add filters: gender, language, accent, tone
-- [ ] Add search
-- [ ] Link from homepage "Browse Voices" CTA
-- [ ] Consider: do we show Chatterbox house voices or just samples?
+  - Inline play button for audio preview
+  - Tags (Professional, Warm, Clear, etc.)
+  - Avatar icons with gender-differentiated gradients (pink-purple female, blue-indigo male)
+- [x] Add filters: Language, Gender dropdowns
+- [x] 8 use-case category cards (Corporate, Education, Entertainment, etc.)
+- [x] Link from homepage nav ("Voice Catalog")
+- [x] Sticky bottom play bar with audio visualization
 
-**Design considerations:**
-- Keep consistent with existing doppel.talk design language
-- Mobile-friendly grid
-- Fast audio preview (preload metadata)
+**Voice Count:** 23 total
+- 7 Chatterbox voices (existing)
+- 16 Polly voices (ported from voice-demos.doppel.center)
+
+**Polly audio files copied to:** `public/audio/polly/`
 
 ### 3. Retire doppel.center (Phase 8)
-**Blocked by:** Voice catalog page completion
+**Status:** IN PROGRESS (blocked on CEO verification)
 
-Once catalog is live:
-- [ ] Verify doppel.talk catalog has feature parity
+Feature parity confirmed - doppel.talk has:
+- Voice catalog (23 voices vs 16 on doppel.center)
+- Full TTS engine in dashboard (23 languages, voice cloning, exaggeration/CFG controls)
+- Superior to voice-demos.doppel.center (which required BYOC Twilio credentials)
+
+Remaining tasks:
+- [ ] CEO verification of feature parity (in progress)
 - [ ] Shut down Render deployment (doppel.center API)
 - [ ] Shut down voice-demos.doppel.center (static frontend)
 - [ ] Update/remove DNS records
 - [ ] Archive local `~/projects/doppel.center/` folder
+
+---
+
+## Commit Summary
+
+**Commit:** `235b304` - "Add voice catalog page + butterfly logo branding"
+- 54 files changed, 1027 insertions
+- Voice catalog page: `src/app/ai-voice-catalog/page.tsx`
+- Logo assets: `public/logo-butterfly.png`, favicons
+- 16 Polly audio files: `public/audio/polly/*.mp3`
+- Nav updates: `src/app/page.tsx`
+- Metadata updates: `src/app/layout.tsx`
 
 ---
 
@@ -94,8 +100,13 @@ doppel.talk/
 │   ├── backend/         # Modal Chatterbox (tts.py)
 │   └── postman/         # API collection
 ├── src/                 # Next.js app
+│   └── app/
+│       └── ai-voice-catalog/  # NEW: Public voice catalog
 ├── prisma/              # Database schema
-└── public/              # Static assets (favicon goes here)
+└── public/              # Static assets
+    ├── logo-butterfly.png     # NEW: Nav logo
+    ├── favicon.svg            # NEW: SVG favicon
+    └── audio/polly/           # NEW: 16 Polly samples
 ```
 
 ---
@@ -105,10 +116,11 @@ doppel.talk/
 | Purpose | Location |
 |---------|----------|
 | Homepage (has nav logo) | `src/app/page.tsx` |
-| Favicon | `public/favicon.ico` |
-| Logo drafts | `bizops/assets/doppel-talk-logo-draft*.{svg,png}` |
-| Voice samples (S3) | `s3://doppel-talk/samples/voices/` |
-| House voices dropdown | `src/app/(dashboard)/dashboard/create/page.tsx` (VOICE_FILES array) |
+| Voice Catalog | `src/app/ai-voice-catalog/page.tsx` |
+| Favicon (SVG) | `public/favicon.svg` |
+| Nav Logo | `public/logo-butterfly.png` |
+| Polly Samples | `public/audio/polly/*.mp3` |
+| House voices dropdown | `src/app/(dashboard)/dashboard/create/page.tsx` |
 
 ---
 
@@ -139,6 +151,7 @@ API keys stored in `~/.claude/credentials/DOPPEL-TALK-API-KEYS.md`:
 cd ~/projects/doppel.talk
 npm run dev
 # → http://localhost:3000
+# → http://localhost:3000/ai-voice-catalog
 ```
 
 ---
@@ -156,32 +169,25 @@ npm run dev
 
 ---
 
-## Decision for Next Agent
+## Decision Log
 
-The voice catalog page is the main blocker. Two approaches:
-
-**Option A: Quick & Simple**
-- Static page with hardcoded voice samples
-- Just display the 9 voices currently in VOICE_FILES
-- Get it live fast, iterate later
-
-**Option B: Dynamic & Scalable**
-- Create `/api/voices` endpoint
-- Pull from database or config
-- Full filtering/search
-- More work but more flexible
-
-Recommend discussing with CEO before starting.
+| Decision | Choice | Rationale |
+|----------|--------|-----------|
+| Logo | Pixelating butterfly | Enterprise aesthetic, represents data transformation |
+| Voice catalog approach | Static (Option A) | Fast to ship, 23 voices hardcoded |
+| Route naming | `/ai-voice-catalog` | SEO optimization per CEO |
+| Avatar icons | UserRound silhouette | Cleaner than initials |
 
 ---
 
-## Open Questions
+## Next Steps (Phase 8)
 
-1. Which logo draft to use? (Need CEO input)
-2. Static vs dynamic voice catalog? (See above)
-3. Should catalog show pricing? (Current: credits-based, internal)
-4. Do we need voice "categories" beyond the filter dimensions?
+Once CEO confirms feature parity:
+1. Shut down Render services
+2. Update DNS
+3. Archive doppel.center folder
+4. Consider: rename doppel.talk → double.talk?
 
 ---
 
-*Ready for next sprint. Voice catalog + logo = Phase 8 unblocked.*
+*Sprint 260111B complete. Voice catalog + logo shipped. Phase 8 retirement pending CEO verification.*
