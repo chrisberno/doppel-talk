@@ -14,6 +14,19 @@
 | Stop | 9:55 PM |
 | **Total** | **1h 30m** |
 
+## Token Burn (Estimated)
+
+| Category | Input | Output |
+|----------|-------|--------|
+| File reads (~8 files) | ~12,000 | - |
+| Tool calls (~25 bash/edit) | ~3,000 | ~2,000 |
+| Dialogue | ~4,000 | ~6,000 |
+| System context | ~2,000 | - |
+| **Total** | **~21,000** | **~8,000** |
+| **Combined** | **~29,000 tokens** | |
+
+*Note: Estimates based on session activity. For precise tracking, pull from API usage logs.*
+
 ---
 
 ## Issue
