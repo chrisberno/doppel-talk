@@ -103,7 +103,8 @@ export async function uploadVoice(
     };
   } catch (error) {
     console.error("Voice upload error:", error);
-    return { success: false, error: "Failed to upload voice file" };
+    const errorMessage = error instanceof Error ? error.message : "Failed to upload voice file";
+    return { success: false, error: errorMessage };
   }
 }
 
