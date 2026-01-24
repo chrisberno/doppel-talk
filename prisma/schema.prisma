@@ -24,6 +24,7 @@ model User {
   credits       Int       @default(10)
   audioProjects AudioProject[]
   uploadedVoices UploadedVoice[]
+  scripts       Script[]
   apiKeys       ApiKey[]
   // API metering fields
   monthlyPlays        Int       @default(0)
@@ -85,6 +86,22 @@ model UploadedVoice {
   updatedAt DateTime @updatedAt
 
   @@map("uploaded_voice")
+}
+
+model Script {
+  id          String   @id @default(cuid())
+  name        String
+  content     String   // The actual script text
+  type        String?  // "ivr", "greeting", "announcement", "promo", "voicemail", "broadcast"
+  department  String?  // "sales", "support", "hr", "marketing"
+  tags        String[] @default([])
+  status      String   @default("draft") // "draft", "production", "archived"
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("script")
 }
 
 model Session {

@@ -52,6 +52,7 @@ export async function uploadVoice(
     }
 
     const file = formData.get("voice") as File;
+    const customName = formData.get("name") as string | null;
 
     if (!file) {
       return { success: false, error: "No file provided" };
@@ -87,9 +88,12 @@ export async function uploadVoice(
       { expiresIn: 3600 * 24 * 7 },
     );
 
+    // Use custom name if provided, otherwise fall back to filename
+    const displayName = customName?.trim() || file.name;
+
     const uploadedVoice = await db.uploadedVoice.create({
       data: {
-        name: file.name,
+        name: displayName,
         s3Key: fileName,
         url: signedUrl,
         userId: session.user.id,
