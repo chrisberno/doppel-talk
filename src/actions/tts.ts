@@ -290,6 +290,8 @@ export async function updateAudioProject(
   }
 }
 
+import { registerAssetInBeaverdam } from "./beaverdam";
+
 function generatePublicSlug(): string {
   // Generate a random slug (8 characters)
   return Math.random().toString(36).substring(2, 10);
@@ -299,6 +301,7 @@ export async function togglePublicSharing(id: string): Promise<{
   success: boolean;
   publicSlug?: string;
   publicUrl?: string;
+  beaverdamAssetId?: string;
   error?: string;
 }> {
   try {
@@ -328,7 +331,8 @@ export async function togglePublicSharing(id: string): Promise<{
     let publicUrl: string | null = null;
 
     if (project.isPublic) {
-      // Make private
+      // Make private - note: we keep the BeaverDAM registration for now
+      // (unpublishing from DAM would be a separate action)
       await db.audioProject.update({
         where: { id },
         data: {
@@ -359,16 +363,43 @@ export async function togglePublicSharing(id: string): Promise<{
 
       publicUrl = `${baseUrl}/public/${publicSlug}`;
 
+      // Register in BeaverDAM if not already registered
+      let beaverdamAssetId = project.beaverdamAssetId;
+      if (!beaverdamAssetId) {
+        const damResult = await registerAssetInBeaverdam({
+          url: project.audioUrl,
+          title: project.name || `Audio Project ${project.id.slice(0, 8)}`,
+          description: project.text.slice(0, 200),
+          metadata: {
+            source: "doppel.talk",
+            projectId: project.id,
+            userId: project.userId,
+            language: project.language,
+            type: project.type,
+            department: project.department,
+          },
+        });
+
+        if (damResult.success && damResult.assetId) {
+          beaverdamAssetId = damResult.assetId;
+          console.log(`Registered in BeaverDAM: ${beaverdamAssetId}`);
+        } else {
+          // Log warning but don't block - BeaverDAM is optional for now
+          console.warn("BeaverDAM registration skipped:", damResult.error);
+        }
+      }
+
       await db.audioProject.update({
         where: { id },
         data: {
           isPublic: true,
           publicSlug,
           publicUrl,
+          beaverdamAssetId: beaverdamAssetId || undefined,
         },
       });
 
-      return { success: true, publicSlug, publicUrl };
+      return { success: true, publicSlug, publicUrl, beaverdamAssetId: beaverdamAssetId || undefined };
     }
   } catch (error) {
     console.error("Error toggling public sharing:", error);

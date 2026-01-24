@@ -64,6 +64,8 @@ model AudioProject {
   isPublic           Boolean  @default(false)
   publicSlug         String?  @unique
   publicUrl          String?
+  // BeaverDAM integration
+  beaverdamAssetId   String?  // Asset ID in BeaverDAM when published
   accessCount        Int      @default(0)
   lastAccessed       DateTime?
   monthlyAccessCount Int      @default(0)

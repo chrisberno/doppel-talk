@@ -54,6 +54,7 @@ Only approved Projects go to BeaverDAM. Voices and Scripts are private inputs. D
 | Project assembly dialog (New Project) | S5b | 2026-01-24 |
 | Voice + Script selection in Projects | S5b | 2026-01-24 |
 | Nav simplification (flat structure) | S5b | 2026-01-24 |
+| BeaverDAM integration on publish | S5b | 2026-01-24 |
 
 ---
 
@@ -87,8 +88,8 @@ Only approved Projects go to BeaverDAM. Voices and Scripts are private inputs. D
 | Task | Description | Status |
 |------|-------------|--------|
 | Project Assembly Flow | Voice + Script → Generate → QA → Approve | ✅ Done (dialog) |
-| Project States | Draft → Approved → Distributed | Pending |
-| Asset Activation | "Approve for Distribution" → BeaverDAM | Pending |
+| Project States | Draft → Approved → Distributed | ✅ Done (existing status field) |
+| Asset Activation | "Approve for Distribution" → BeaverDAM | ✅ Done (publish = register in DAM) |
 | Projects Dashboard | View/manage all projects | ✅ Done |
 
 ### Navigation
@@ -98,15 +99,6 @@ Only approved Projects go to BeaverDAM. Voices and Scripts are private inputs. D
 | Voice Library nav | Voices section with Clones + Agents | ✅ Done |
 | Script Book nav | Scripts section with states | ✅ Done |
 | Projects nav | Projects/outputs section | ✅ Done |
-
----
-
-## Infrastructure (S5d - Lower Priority)
-
-| Task | Description | Status |
-|------|-------------|--------|
-| Own S3 Bucket | Separate from Connie's AWS | Pending |
-| Tier Logic | Free vs Bronze enforcement | Pending |
 
 ---
 
@@ -130,6 +122,8 @@ Only approved Projects go to BeaverDAM. Voices and Scripts are private inputs. D
 
 | Item | Category | Notes |
 |------|----------|-------|
+| Own S3 Bucket | Infrastructure | Separate from Connie's AWS - billing independence |
+| Tier Logic | Infrastructure | Free vs Bronze enforcement |
 | Share Draft for Review | Collaboration | Share preview link without full BeaverDAM distribution |
 | `upload_asset` MCP tool | BeaverDAM | Direct file upload via MCP (deferred) |
 | White-label API docs | Developer Experience | Enable partners to embed Doppel |

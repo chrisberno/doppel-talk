@@ -20,6 +20,9 @@ export const env = createEnv({
     MODAL_API_URL: z.string().url(),
     MODAL_API_KEY: z.string(),
     MODAL_API_SECRET: z.string(),
+    // BeaverDAM integration
+    BEAVERDAM_API_URL: z.string().url().optional(),
+    BEAVERDAM_API_TOKEN: z.string().optional(),
     NODE_ENV: z
       .enum(["development", "test", "production"])
       .default("development"),
@@ -53,6 +56,8 @@ export const env = createEnv({
     MODAL_API_URL: process.env.MODAL_API_URL,
     MODAL_API_KEY: process.env.MODAL_API_KEY,
     MODAL_API_SECRET: process.env.MODAL_API_SECRET,
+    BEAVERDAM_API_URL: process.env.BEAVERDAM_API_URL,
+    BEAVERDAM_API_TOKEN: process.env.BEAVERDAM_API_TOKEN,
     // NEXT_PUBLIC_CLIENTVAR: process.env.NEXT_PUBLIC_CLIENTVAR,
   },
   /**
