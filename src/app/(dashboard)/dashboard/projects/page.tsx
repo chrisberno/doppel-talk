@@ -31,13 +31,13 @@ import {
 } from "~/actions/tts";
 import { toast } from "sonner";
 import ExportModal from "~/components/export-modal";
+import NewProjectDialog from "~/components/projects/new-project-dialog";
 
 import { Card, CardContent } from "~/components/ui/card";
 
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 
-import { useRouter } from "next/navigation";
 
 interface AudioProject {
   id: string;
@@ -72,6 +72,7 @@ export default function Projects() {
   const [sortBy, setSortBy] = useState<SortBy>("newest");
   const [exportModalOpen, setExportModalOpen] = useState(false);
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
+  const [newProjectDialogOpen, setNewProjectDialogOpen] = useState(false);
   // Filters
   const [filterType, setFilterType] = useState<string>("all");
   const [filterDepartment, setFilterDepartment] = useState<string>("all");
@@ -79,7 +80,6 @@ export default function Projects() {
   // Editable name state
   const [editingNameId, setEditingNameId] = useState<string | null>(null);
   const [editingNameValue, setEditingNameValue] = useState<string>("");
-  const router = useRouter();
 
   useEffect(() => {
     const initializeProjects = async () => {
@@ -199,6 +199,14 @@ export default function Projects() {
     }
   };
 
+  const refreshProjects = async () => {
+    const projectsResult = await getUserAudioProjects();
+    if (projectsResult.success && projectsResult.audioProjects) {
+      setAudioProjects(projectsResult.audioProjects);
+      setFilteredProjects(projectsResult.audioProjects);
+    }
+  };
+
   const handleToggleSharing = async (projectId: string, e: React.MouseEvent) => {
     e.stopPropagation();
     const project = audioProjects.find((p) => p.id === projectId);
@@ -275,11 +283,11 @@ export default function Projects() {
               </p>
             </div>
             <Button
-              onClick={() => router.push("/dashboard/create")}
+              onClick={() => setNewProjectDialogOpen(true)}
               className="gap-2 self-start sm:self-auto"
             >
               <Plus className="h-4 w-4" />
-              New Audio
+              New Project
             </Button>
           </div>
           <Card>
@@ -386,11 +394,11 @@ export default function Projects() {
                   </p>
                   {!searchQuery && (
                     <Button
-                      onClick={() => router.push("/dashboard/create")}
+                      onClick={() => setNewProjectDialogOpen(true)}
                       className="gap-2"
                     >
                       <Plus className="h-4 w-4" />
-                      Create Your First Audio
+                      Create Your First Project
                     </Button>
                   )}
 
@@ -622,6 +630,11 @@ export default function Projects() {
               filteredProjects.find((p) => p.id === selectedProjectId)?.text.substring(0, 30)
             : undefined
         }
+      />
+      <NewProjectDialog
+        open={newProjectDialogOpen}
+        onOpenChange={setNewProjectDialogOpen}
+        onProjectCreated={refreshProjects}
       />
     </>
   );

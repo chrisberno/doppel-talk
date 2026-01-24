@@ -49,6 +49,11 @@ Only approved Projects go to BeaverDAM. Voices and Scripts are private inputs. D
 | Script States (Draft/Production/Archived) | S5b | 2026-01-24 |
 | Script Metadata (name, type, department) | S5b | 2026-01-24 |
 | Script Book nav item | S5b | 2026-01-24 |
+| Voice Library Page (`/dashboard/voices`) | S5b | 2026-01-24 |
+| Voice agents shared data module | S5b | 2026-01-24 |
+| Project assembly dialog (New Project) | S5b | 2026-01-24 |
+| Voice + Script selection in Projects | S5b | 2026-01-24 |
+| Nav simplification (flat structure) | S5b | 2026-01-24 |
 
 ---
 
@@ -60,9 +65,9 @@ Only approved Projects go to BeaverDAM. Voices and Scripts are private inputs. D
 |------|-------------|--------|
 | In-Browser Recording | Record voice samples in browser | ✅ Done (isolated page) |
 | Custom Voice Naming | User-defined names for samples | ✅ Done |
-| Voice Library Page | `/dashboard/voices` - manage all voice samples | Pending |
-| Professional Agents | Pre-made voice library (curated) | Pending |
-| Integrate into Create flow | Select voice from library in generation | Pending |
+| Voice Library Page | `/dashboard/voices` - manage all voice samples | ✅ Done |
+| Professional Agents | Pre-made voice library (curated) | ✅ Done (23 agents) |
+| Integrate into Create flow | Select voice from library in generation | ✅ Done (Projects assembly) |
 
 ### Script Book
 
@@ -75,24 +80,24 @@ Only approved Projects go to BeaverDAM. Voices and Scripts are private inputs. D
 | Script Metadata | Name, type, department, tags | ✅ Done |
 | Canned Scripts | Pre-made script templates | Pending |
 | AI Script Generation | Generate scripts with AI | Future |
-| Integrate into Create flow | Select script from library in generation | Pending |
+| Integrate into Create flow | Select script from library in generation | ✅ Done (Projects assembly) |
 
 ### Projects (Assembly)
 
 | Task | Description | Status |
 |------|-------------|--------|
-| Project Assembly Flow | Voice + Script → Generate → QA → Approve | Pending |
+| Project Assembly Flow | Voice + Script → Generate → QA → Approve | ✅ Done (dialog) |
 | Project States | Draft → Approved → Distributed | Pending |
 | Asset Activation | "Approve for Distribution" → BeaverDAM | Pending |
-| Projects Dashboard | View/manage all projects | Exists (needs update) |
+| Projects Dashboard | View/manage all projects | ✅ Done |
 
 ### Navigation
 
 | Task | Description | Status |
 |------|-------------|--------|
-| Voice Library nav | Voices section with Clones + Agents | Pending |
+| Voice Library nav | Voices section with Clones + Agents | ✅ Done |
 | Script Book nav | Scripts section with states | ✅ Done |
-| Projects nav | Projects/outputs section | Exists |
+| Projects nav | Projects/outputs section | ✅ Done |
 
 ---
 
