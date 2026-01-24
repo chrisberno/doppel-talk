@@ -1,8 +1,8 @@
 # Sprint S5c: BeaverDAM MCP Tools - Complete The Loop
 
-**Date:** 2026-01-23 (Planning)
+**Date:** 2026-01-23
 **Type:** Infrastructure Sprint
-**Status:** READY FOR DEVELOPMENT
+**Status:** ✅ TASKS 1 & 3 COMPLETE (Task 2 deferred)
 **Depends On:** S4 (Ship The Wire) - ✅ COMPLETE
 **Blocks:** S5b Task 3 (Asset Activation UI)
 
@@ -100,10 +100,12 @@ mcp__beaverdam__register_asset({
 - Directus custom endpoint or extension
 
 **Acceptance Criteria:**
-- [ ] MCP tool available in Claude Code
-- [ ] Creates asset record in Directus
-- [ ] Returns asset ID for future reference
-- [ ] Asset accessible via BeaverDAM API
+- [x] MCP tool available in Claude Code
+- [x] Creates asset record in Directus (via importFile)
+- [x] Returns asset ID for future reference
+- [x] Asset accessible via BeaverDAM API
+
+**Implementation:** Published in `@thebeaverdam/mcp@1.1.0`
 
 ---
 
@@ -162,9 +164,13 @@ mcp__beaverdam__log_access({
 - Should be fire-and-forget (non-blocking)
 
 **Acceptance Criteria:**
-- [ ] MCP tool logs access events
-- [ ] Events queryable in Directus
-- [ ] Supports analytics queries
+- [x] MCP tool logs access events
+- [x] Events queryable in Directus
+- [x] Supports analytics queries
+
+**Implementation:**
+- Published in `@thebeaverdam/mcp@1.1.0`
+- Created `access_logs` collection in Directus
 
 ---
 
