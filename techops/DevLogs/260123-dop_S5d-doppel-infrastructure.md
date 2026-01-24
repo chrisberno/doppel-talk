@@ -173,8 +173,9 @@ POLAR_WEBHOOK_SECRET=xxx
 
 ### Doppel Database
 
-```
-DATABASE_URL="postgresql://neondb_owner:npg_Poe7fYgw8HqC@ep-old-butterfly-ah57qql2-pooler.c-3.us-east-1.aws.neon.tech/neondb?sslmode=require"
+**Get credentials via Vercel:**
+```bash
+vercel env pull .env.local --environment=production
 ```
 
 ---
