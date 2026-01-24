@@ -133,20 +133,20 @@ Only approved Projects go to BeaverDAM. Voices and Scripts are private inputs. D
 
 ---
 
-## Architecture Reference
+## Architecture Reference: Studio → Network
 
 ```
-DOPPEL (Create)                    BEAVERDAM (Distribute)
-─────────────────                  ────────────────────────
+DOPPEL (Studio)                    BEAVERDAM (Network)
+───────────────                    ────────────────────
 Voice Library (private)            Approved Projects only
 Script Book (private)              Access control
-Draft Projects (private)           Usage logging
-                    ──approve──►   Distribution rules
+Draft Projects (private)           Usage tracking
+                    ──publish──►   Distribution & governance
 ```
 
 **What goes where:**
-| Asset Type | Doppel | BeaverDAM |
-|------------|--------|-----------|
+| Asset Type | Doppel (Studio) | BeaverDAM (Network) |
+|------------|-----------------|---------------------|
 | Voice Samples | ✅ | ❌ |
 | Scripts | ✅ | ❌ |
 | Draft Projects | ✅ | ❌ |
@@ -154,4 +154,4 @@ Draft Projects (private)           Usage logging
 
 ---
 
-*"Voice + Script = Project. Only approved projects leave the factory."*
+*"Voice + Script = Project. Only approved projects leave the studio."*
